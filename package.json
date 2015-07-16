@@ -1,0 +1,52 @@
+{
+  "name": "waferpie-poor",
+  "version": "0.0.1",
+  "description": "S2way pool manager",
+  "main": "dist/main.js",
+  "scripts": {},
+  "config": {
+    "blanket": {
+      "pattern": "lib/",
+      "loader": "./node-loaders/coffee-script.js"
+    },
+    "mocha-cov-reporter": {
+      "failOnError": true,
+      "threshold": 90,
+      "useColors": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/s2way/reports"
+  },
+  "author": "Juliano Lazzarotto",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/s2way/waferpie-poor/issues"
+  },
+  "devDependencies": {
+    "blanket": "git://github.com/alex-seville/blanket.git",
+    "coffee-coverage": "^0.4.6",
+    "coffee-script": "latest",
+    "coffeelint": "^1.9.4",
+    "expect.js": "^0.3.1",
+    "grunt": "~0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-coffeelint": "0.0.13",
+    "grunt-contrib-coffee": "^0.13.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-exec": "~0.4.6",
+    "grunt-mocha-test": "^0.12.7",
+    "load-grunt-tasks": "^3.1.0",
+    "mocha": "^2.2.4",
+    "mocha-cov-reporter": "^1.1.0",
+    "travis-cov": "^0.2.5"
+  },
+  "engines": {
+    "node": ">= 0.6.0",
+    "npm": ">= 1.0.0"
+  },
+  "dependencies": {
+    "underscore": "^1.8.3"
+  }
+}

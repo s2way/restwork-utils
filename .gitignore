@@ -1,0 +1,11 @@
+*.bat
+*.sh
+*.log
+*.swp
+*.html
+*.out
+
+node_modules/
+.idea/
+
+dist/
