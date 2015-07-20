@@ -1,3 +1,8 @@
+###
+# Copyright(c) 2015 Juliano Jorge Lazzarotto aka dOob
+# Apache2 Licensed
+###
+
 class Exceptions
 
     # Defaults
@@ -5,10 +10,11 @@ class Exceptions
     @TYPE_ERROR: 'Error'
 
     # Errors
-    @INVALID_ARGUMENT: 'Invalid argument'
-    @NO_SRC_FILE: 'Source is missing or it is not a file'
-    @DST_EXISTS: 'Destination already exists.'
     @NOT_JSON: 'File content is not a valid JSON'
+    @DST_EXISTS: 'Destination already exists.'
+    @NO_SRC_FILE: 'Source is missing or it is not a file'
+    @INVALID_OBJECT: 'Invalid object'
+    @INVALID_ARGUMENT: 'Invalid argument'
 
     @Fatal: (@name, @message = '') ->
         @type = Exceptions.TYPE_FATAL

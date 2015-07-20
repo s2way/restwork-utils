@@ -3,8 +3,6 @@
 # Apache2 Licensed
 ###
 
-_ = require 'underscore'
-
 class Navigator
 
     @get: (object, expression) ->

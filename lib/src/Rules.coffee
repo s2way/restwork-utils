@@ -16,7 +16,8 @@ class Rules
     @REGEX_TIME: /^\d{2}\:\d{2}\:\d{2}$/
     @REGEX_DATETIME: /^\d{4}\-\d{2}\-\d{2}[T]\d{2}\:\d{2}\:\d{2}$/
     @REGEX_ISODATE: /(\d{4})-(\d{2})-(\d{2})T((\d{2}):(\d{2}):(\d{2}))\.(\d{3})Z/
-# Format
+
+    # Format
     @FORMAT_DATE: 'YYYY-MM-DD'
     @FORMAT_TIME: 'HH:mm:ss'
     @FORMAT_DATETIME: 'YYYY-MM-DDTHH:mm:ss'

@@ -14,12 +14,12 @@ require('better-require')()
 
 class Files
 
-# Defaults
+    # Defaults
     @DEFAULT_PERM_FILE: 766
     @DEFAULT_PERM_DIR: 766
     @DEFAULT_ENCODING: 'utf8'
 
-# Transform a array of files into a JSON object
+    # Transform a array of files into a JSON object
     @arrayOfFiles2JSON: (files, withPath) ->
         result = {}
         _.map files, (value) ->
@@ -34,19 +34,19 @@ class Files
             result[key] = value
         result
 
-# Transform a file into a JSON object if is possible
+    # Transform a file into a JSON object if is possible
     @file2JSON: (file) ->
-        throw new Exceptions.Error Files.ERROR_NO_SRC_FILE unless Files.isFile file
+        throw new Exceptions.Error Exceptions.NO_SRC_FILE unless Files.isFile file
         try
-# Remove from cache to ensure the loading
+            # Remove from cache to ensure the loading
             delete require.cache[file]
             result = require file
             JSON.parse JSON.stringify result
         catch e
             throw new Exceptions.Fatal Exceptions.NOT_JSON, e
 
-# Check for the presence of files
-# returns false if one in the list does not exist
+    # Check for the presence of files
+    # returns false if one in the list does not exist
     @checkPath: (paths, result = false) ->
         try
             _.map paths, (value) ->
@@ -57,30 +57,30 @@ class Files
                     Files.checkPath value, result
         result
 
-# Create a file if destination does not exist
+    # Create a file if destination does not exist
     @createFileIfNotExists: (to, content, encoding = Files.DEFAULT_ENCODING, mode = Files.DEFAULT_PERM_FILE) ->
         throw new Exceptions.Error Exceptions.DST_EXISTS, 'File: ' + to if fs.existsSync to
         fs.writeFileSync to, content,
             mode: parseInt mode, 8
             encoding: encoding
 
-# Check if the directory exists, if does not try to create it
+    # Check if the directory exists, if does not try to create it
     @createDirIfNotExists: (dir, mode = Files.DEFAULT_PERM_DIR) ->
         throw new Exceptions.Error Exceptions.DST_EXISTS, 'Dir: ' + dir if fs.existsSync dir
         fs.mkdirSync dir, parseInt mode, 8
 
-# Check if is a file
+    # Check if is a file
     @isFile: (file) ->
         stats = fs.lstatSync file if fs.existsSync file
         stats?.isFile()
 
-# Copy a file from a place to another if the destination does not exist and the source exists
+    # Copy a file from a place to another if the destination does not exist and the source exists
     @copyIfNotExists: (from, to, encoding = Files.DEFAULT_ENCODING, mode = Files.DEFAULT_PERM_FILE) ->
         throw new Exceptions.Error Exceptions.NO_SRC_FILE, 'File:' + from unless @isFile from
         Files.createFileIfNotExists to, fs.readFileSync from, encoding, mode
 
-# Create directory structure if does not exist, if exists leave it
-# returns an array with the structure created
+    # Create directory structure if does not exist, if exists leave it
+    # returns an array with the structure created
     @syncDirStructure: (paths, mode = Files.DEFAULT_PERM_DIR, result = []) ->
         try
             _.map paths, (value) ->
@@ -91,7 +91,7 @@ class Files
                     Files.syncDirStructure value, mode, result
         result
 
-# Return an Array with the list of files inside a given folder (recursive)
+    # Return an Array with the list of files inside a given folder (recursive)
     @listFilesFromDir: (dir = '', result = []) ->
         files = fs.readdirSync dir if fs.existsSync dir
         _.map files, (value) ->
@@ -102,8 +102,8 @@ class Files
             Files.listFilesFromDir obj, result if stats?.isDirectory()
         result
 
-# Load all files
-# @param {object} files A key-value JSON with the target key and the complete file name
+    # Load all files
+    # @param {object} files A key-value JSON with the target key and the complete file name
     @loadNodeFiles: (files = {}) ->
         result = {}
         _.map files, (value, key) ->
