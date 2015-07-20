@@ -1,7 +1,7 @@
 {
-  "name": "waferpie-poor",
-  "version": "0.0.1",
-  "description": "S2way pool manager",
+  "name": "waferpie-utils",
+  "version": "0.1.0",
+  "description": "S2way - WaferPie global tools",
   "main": "dist/main.js",
   "scripts": {},
   "config": {
@@ -22,7 +22,7 @@
   "author": "Juliano Lazzarotto",
   "license": "BSD-2-Clause",
   "bugs": {
-    "url": "https://github.com/s2way/waferpie-poor/issues"
+    "url": "https://github.com/s2way/waferpie-utils/issues"
   },
   "devDependencies": {
     "blanket": "git://github.com/alex-seville/blanket.git",
@@ -47,6 +47,8 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
+    "better-require": "0.0.3",
+    "moment": "^2.10.3",
     "underscore": "^1.8.3"
   }
 }
