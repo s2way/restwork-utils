@@ -2,7 +2,7 @@
   "name": "waferpie-utils",
   "version": "0.1.0",
   "description": "S2way - WaferPie global tools",
-  "main": "dist/main.js",
+  "main": "dist/Main.js",
   "scripts": {},
   "config": {
     "blanket": {
