@@ -150,46 +150,51 @@ describe 'Validator.js', ->
                 validate: validate
             )
             expect(validator.match data).to.be.ok()
-#
-#        it 'should return an error if there is a field that is not specified in the validate', ->
-#            validate =
-#                string: false
-#                array: false
-#                object:
-#                    object: false
-#                    number: false
-#
-#            data =
-#                object:
-#                    iShouldnt: 'beHere'
-#
-#            validator = new Validator(validate: validate)
-#            result = validator.match(data)
-#            expect(result).to.eql
-#                field: 'object.iShouldnt'
-#                level: 2
-#                error: 'denied'
-#
-#        it 'should return true if the field that would not match has been ignored', ->
-#            validate =
-#                string: false
-#                array: false
-#                object:
-#                    sub:
-#                        object: false
-#                        number: false
-#
-#            data =
-#                object:
-#                    sub:
-#                        iShouldnt: 'beHere'
-#
-#            skipMatch = ['object.sub']
-#
-#            validator = new Validator(validate: validate, skipMatch: skipMatch)
-#            result = validator.match(data)
-#            expect(result).to.be true
-#
+
+        it 'should return an error if there is a field that is not specified in the validate', ->
+            validate =
+                string: false
+                array: false
+                object:
+                    object: false
+                    number: false
+
+            data =
+                object:
+                    iShouldnt: 'beHere'
+
+            validator = new Validator(
+                validate: validate
+            )
+            result = validator.match data
+            expect(result).to.eql
+                field: 'object.iShouldnt'
+                level: 2
+                error: 'denied'
+
+        it 'should return true if the field that would not match has been ignored', ->
+            validate =
+                string: false
+                array: false
+                object:
+                    sub:
+                        object: false
+                        number: false
+
+            data =
+                object:
+                    sub:
+                        iShouldnt: 'beHere'
+
+            skipMatch = ['object.sub']
+
+            validator = new Validator(
+                validate: validate,
+                skipMatch: skipMatch
+            )
+            result = validator.match data
+            expect(result).to.be true
+
 #    describe 'test', ->
 #
 #        it 'should validate the field if the rules are passed as an object and return the rules that did not pass', ->

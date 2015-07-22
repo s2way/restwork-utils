@@ -93,9 +93,9 @@ class Validator
 
         timeoutFunc()
 
-    _matchAgainst: (data, skipMatch = @_skipMatch, level = 1, validate = @validatorRules, expression = '') ->
+    _matchAgainst: (data, skipMatch = @skipMatch, level = 1, validate = @validatorRules, expression = '') ->
 
-    # check schema field presence
+        # check schema field presence
         for key of data
             # if field must not be ignored
             if (expression + key) in skipMatch
