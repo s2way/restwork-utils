@@ -5,6 +5,7 @@
 
 expect = require 'expect.js'
 Validator = require './../src/Validator'
+Exceptions = require './../src/Exceptions'
 
 describe 'Validator.js', ->
 
@@ -54,110 +55,101 @@ describe 'Validator.js', ->
                 expect(error).not.to.be.ok()
                 expect(fieldErrors).to.eql {}
                 done()
-#
-#        it 'should execute the validation rules passing each field to be validated', (done) ->
-#            validate =
-#                'e-mail':
-#                    'notEmpty': rule: 'notEmpty', message: 'This field cannot be empty'
-#                    'email' : rule: 'email', message: 'This is not a valid e-mail address'
-#                'address.street':
-#                    'maxLength': rule: 'maxLength', message: 'Cannot contain more than 100 chars', params: [100]
-#
-#            validator = new Validator(
-#                validate: validate
-#                timeout: 100
-#            )
-#            validator._navigator = new Navigator()
-#            validator._rules = new Rules()
-#            validator.validate data, (error, validatedFields) ->
-#                expectedValidatedFields =
-#                    'e-mail': true
-#                    'address.street': true
-#
-#                expect(error).not.to.be.ok()
-#                expect(validatedFields).to.eql expectedValidatedFields
-#                done()
-#
-#
-#        it 'should return expired as true if the validation functions took too long', (done) ->
-#            validate =
-#                cpf: (value, validationData, callback) ->
-#                    setTimeout (->
-#                        callback()
-#                    ), 10000
-#
-#                'e-mail': (value, validationData, callback) ->
-#                    callback()
-#
-#                'address.street': (value, validationData, callback) ->
-#                    callback()
-#
-#                preferences: (value, validationData, callback) ->
-#                    callback()
-#
-#            validator = new Validator(
-#                validate: validate
-#                timeout: 10
-#            )
-#            validator._navigator = new Navigator()
-#            validator._rules = new Rules()
-#            validator.validate data, (error) ->
-#                expect(error.name).to.be 'ValidationExpired'
-#                done()
-#
-#    describe 'match', ->
-#        it 'should throw an error if the data is invalid', ->
-#            validate =
-#                title: false
-#                description: false
-#
-#            validator = new Validator(validate: validate)
-#            validator._navigator = new Navigator()
-#            expect(->
-#                validator.match title: -> return
-#            ).to.throwException((e) ->
-#                expect(e.name).to.be 'IllegalArgument'
-#            )
-#
-#        it 'should throw an error if the data is undefined or null', ->
-#            validator = new Validator(
-#                validate: {}
-#                field: true
-#            )
-#            expect(->
-#                validator.match()
-#            ).to.throwException((e) ->
-#                expect(e.name).to.be 'IllegalArgument'
-#            )
-#
-#        it 'should throw an error if the data is other thing besides a json', ->
-#            validator = new Validator(
-#                validate: {}
-#                field: true
-#            )
-#            expect(->
-#                validator.match -> return
-#            ).to.throwException((e) ->
-#                expect(e.name).to.be 'IllegalArgument'
-#            )
-#
-#        it 'should return true if the data is according to the validate', ->
-#            validate =
-#                string: true
-#                array: true
-#                object:
-#                    object: array: false
-#                    number: true
-#
-#            data =
-#                string: 'string'
-#                array: [0, 1, 3]
-#                object:
-#                    object: array: [0, 1, 2]
-#                    number: 100
-#
-#            validator = new Validator(validate: validate)
-#            expect(validator.match data).to.be.ok()
+
+        it 'should execute the validation rules passing each field to be validated', (done) ->
+            validate =
+                email:
+                    notEmpty: rule: 'notEmpty', message: 'This field cannot be empty'
+                    email : rule: 'isEmail', message: 'This is not a valid e-mail address'
+                'address.street':
+                    'maxLength': rule: 'maxLength', message: 'Cannot contain more than 100 chars', params: [100]
+
+            validator = new Validator(
+                validate: validate
+                timeout: 100
+            )
+            validator.validate data, (error, validatedFields) ->
+                expectedValidatedFields =
+                    email: true
+                    'address.street': true
+
+                expect(error).not.to.be.ok()
+                expect(validatedFields).to.eql expectedValidatedFields
+                done()
+
+
+        it 'should return expired as true if the validation functions took too long', (done) ->
+            validate =
+                socialNumber: (value, validationData, callback) ->
+                    setTimeout (->
+                        callback()
+                    ), 10000
+
+                email: (value, validationData, callback) ->
+                    callback()
+
+            validator = new Validator(
+                validate: validate
+                timeout: 10
+            )
+            validator.validate data, (error) ->
+                expect(error.name).to.be 'ValidationExpired'
+                done()
+
+    describe 'match', ->
+        it 'should throw an error if the data is invalid', ->
+            validate =
+                title: false
+                description: false
+
+            validator = new Validator(validate: validate)
+            expect(->
+                validator.match title: -> return
+            ).to.throwException((e) ->
+                expect(e.name).to.be Exceptions.INVALID_ARGUMENT
+            )
+
+        it 'should throw an error if the data is undefined or null', ->
+            validator = new Validator(
+                validate: {}
+                field: true
+            )
+            expect(->
+                validator.match()
+            ).to.throwException((e) ->
+                expect(e.name).to.be Exceptions.INVALID_ARGUMENT
+            )
+
+        it 'should throw an error if the data is other thing besides a json', ->
+            validator = new Validator(
+                validate: {}
+                field: true
+            )
+            expect(->
+                validator.match -> return
+            ).to.throwException((e) ->
+                expect(e.name).to.be Exceptions.INVALID_ARGUMENT
+            )
+
+        it 'should return true if the data is according to the validate', ->
+            validate =
+                string: true
+                array: true
+                object:
+                    object: array: false
+                    number: true
+
+            data =
+                string: 'string'
+                array: [0, 1, 3]
+                object:
+                    object: array: [0, 1, 2]
+                    number: 100
+
+            validator = new Validator(
+                validate: validate
+            )
+            expect(validator.match data).to.be.ok()
 #
 #        it 'should return an error if there is a field that is not specified in the validate', ->
 #            validate =

@@ -65,7 +65,7 @@ class Validator
                     )(expression)
                 )
             else
-                result = @_rules.test(value, fieldRule)
+                result = @test(value, fieldRule)
                 fieldErrors[expression] = result if result
                 validatedFields[expression] = true
 
@@ -146,12 +146,12 @@ class Validator
             ruleMethod = rule.rule ? key
             ruleMethodParams = rule.params
             required = rule.required ? false
-            ruleExists = @[ruleMethod]?
+            ruleExists = @Rules[ruleMethod]?
             throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, "Rule #{ruleMethod} not found" unless ruleExists
             if required is false and value is undefined
                 passed = true
             else
-                passed = @[ruleMethod].apply(@, [value].concat ruleMethodParams)
+                passed = @Rules[ruleMethod].apply(@, [value].concat ruleMethodParams)
             unless passed
                 failedRules[key] = rule
                 failureCounter += 1
