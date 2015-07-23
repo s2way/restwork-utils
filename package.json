@@ -2,7 +2,7 @@
   "name": "waferpie-utils",
   "version": "0.1.0",
   "description": "S2way - WaferPie global tools",
-  "main": "dist/Main.js",
+  "main": "lib/Main.coffee",
   "scripts": {
     "install": "grunt compile"
     },
