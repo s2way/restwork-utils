@@ -4,7 +4,8 @@
   "description": "S2way - WaferPie global tools",
   "main": "lib/Main.coffee",
   "scripts": {
-    "install": "grunt compile"
+    "pretest": "coffeelint lib",
+    "test": "mocha lib/test --recursive -R progress --compilers coffee:coffee-script/register"
     },
   "config": {
     "blanket": {
