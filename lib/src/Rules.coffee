@@ -6,6 +6,7 @@
 # Dependencies
 _ = require 'underscore'
 moment = require 'moment'
+Exceptions = require './Exceptions'
 
 class Rules
 
@@ -78,19 +79,19 @@ class Rules
     # STRING rules
     ###
     @maxLength: (value, length = 0) ->
-        value.length <= length
+        value?.length <= length
 
     @minLength: (value, length = 0) ->
-        value.length >= length
+        value?.length >= length
 
     @lengthBetween: (value, min = 0, max = 0) ->
-        min <= value.length <= max
+        min <= value?.length <= max
 
     @exactLength: (value, length) ->
-        value.length is length
+        value?.length is length
 
     @regex: (value, regex) ->
-        regex.test value
+        regex?.test value
 
     ###
     # NUMBER rules
@@ -130,5 +131,31 @@ class Rules
         return false if _.isObject(value) and _.isEmpty(value)
         return false if (value.length is 0) and (_.isString(value) or _.isArray(value))
         true
+
+    # Test if a value will pass a set of validation rules specified in the rules parameter
+    # @value The value to be validated
+    # @rules {object} A JSON containing the rules to be tested against the fields
+    # See the tests for examples
+    @test: (value, rules) ->
+        failureCounter = 0
+        failedRules = {}
+        for key of rules
+            rule = rules[key]
+            rule = {} unless rule?
+            ruleMethod = rule.rule ? key
+            ruleMethodParams = rule.params
+            required = rule.required ? false
+            ruleExists = @[ruleMethod]?
+            throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, "Rule #{ruleMethod} not found" unless ruleExists
+            if required is false and value is undefined
+                passed = true
+            else
+                passed = @[ruleMethod].apply(@, [value].concat ruleMethodParams)
+            unless passed
+                failedRules[key] = rule
+                failureCounter += 1
+
+        return null if failureCounter is 0
+        return failedRules
 
 module.exports = Rules

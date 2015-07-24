@@ -65,7 +65,7 @@ class Validator
                     )(expression)
                 )
             else
-                result = @test(value, fieldRule)
+                result = @_test value, fieldRule
                 fieldErrors[expression] = result if result
                 validatedFields[expression] = true
 
@@ -137,26 +137,7 @@ class Validator
     # @value The value to be validated
     # @rules {object} A JSON containing the rules to be tested against the fields
     # See the tests for examples
-    test: (value, rules) ->
-        failureCounter = 0
-        failedRules = {}
-        for key of rules
-            rule = rules[key]
-            rule = {} unless rule?
-            ruleMethod = rule.rule ? key
-            ruleMethodParams = rule.params
-            required = rule.required ? false
-            ruleExists = @Rules[ruleMethod]?
-            throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, "Rule #{ruleMethod} not found" unless ruleExists
-            if required is false and value is undefined
-                passed = true
-            else
-                passed = @Rules[ruleMethod].apply(@, [value].concat ruleMethodParams)
-            unless passed
-                failedRules[key] = rule
-                failureCounter += 1
-
-        return null if failureCounter is 0
-        return failedRules
+    _test: (value, rules) ->
+        @Rules.test value, rules
 
 module.exports = Validator

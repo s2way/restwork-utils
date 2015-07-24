@@ -3,8 +3,9 @@
 # Apache2 Licensed
 ###
 
-Rules = require '../../lib/src/Rules'
 expect = require 'expect.js'
+Rules = require './../src/Rules'
+Exceptions = require './../src/Exceptions'
 
 describe 'Rules', ->
 
@@ -306,3 +307,63 @@ describe 'Rules', ->
 
         it 'should return true if value is one float', ->
             expect(Rules.isUseful 1.0).to.be.ok()
+
+    describe 'test', ->
+
+        it 'should validate the field if the rules are passed as an object and return the rules that did not pass', ->
+            rules =
+                notEmpty:
+                    rule: 'notEmpty'
+                    message: 'This field cannot be empty'
+                maxLength:
+                    message: 'This field has exceeded the max length'
+                    params: [4]
+
+            result = Rules.test 'A field', rules
+            expect(result).to.be.an 'object'
+            expect(result).to.have.property 'maxLength'
+            expect(result).not.to.have.property 'notEmpty'
+
+        it 'should return all rules failed if they are marked as required: false and the data is undefined', ->
+            rules =
+                notEmpty:
+                    rule: 'notEmpty'
+                    message: 'This field cannot be empty'
+                    required: true
+                maxLength:
+                    message: 'This field has exceeded the max length'
+                    params: [4]
+                    required: true
+
+            result = Rules.test undefined, rules
+            expect(result).to.be.an 'object'
+            expect(result).to.have.property 'maxLength'
+            expect(result).to.have.property 'notEmpty'
+
+        it 'should return success if the rules are marked as required: false and the data is undefined', ->
+            rules =
+                notEmpty:
+                    rule: 'notEmpty'
+                    message: 'This field cannot be empty'
+                    required: false
+                maxLength:
+                    message: 'This field has exceeded the max length'
+                    params: [4]
+            # required: false # The default value is false!
+
+            result = Rules.test undefined, rules
+            expect(result).to.be null
+
+        it 'should return null when all fields have passed the validation', ->
+            rules =
+                notEmpty: {}
+            result = Rules.test 'A field', rules
+            expect(result).to.be null
+
+        it 'should throw an IllegalArgument exception if the rule does not exist', ->
+            rules = invalidRule: null
+            expect(->
+                Rules.test 'nothing', rules
+            ).to.throwException((e) ->
+                expect(e.name).to.be Exceptions.INVALID_ARGUMENT
+            )
