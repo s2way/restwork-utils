@@ -2,8 +2,11 @@
   "name": "waferpie-utils",
   "version": "0.1.0",
   "description": "S2way - WaferPie global tools",
-  "main": "dist/Main.js",
-  "scripts": {},
+  "main": "lib/Main.coffee",
+  "scripts": {
+    "pretest": "coffeelint lib",
+    "test": "mocha lib/test --recursive -R progress --compilers coffee:coffee-script/register"
+    },
   "config": {
     "blanket": {
       "pattern": "lib/",
