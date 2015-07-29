@@ -11,7 +11,7 @@ expect = require 'expect.js'
 Files = require './../src/Files'
 Exceptions = require './../src/Exceptions'
 
-describe 'Files.js', ->
+describe 'Files', ->
 
     root = path.resolve path.join '.', path.sep
     permission = parseInt('766', 8)

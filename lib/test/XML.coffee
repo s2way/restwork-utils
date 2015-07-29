@@ -1,7 +1,7 @@
 XML = require './../src/XML'
 expect = require 'expect.js'
 
-describe "XML.js", ->
+describe "XML", ->
     instance = new XML()
     json = root:
         child: [

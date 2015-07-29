@@ -6,7 +6,7 @@
 Navigator = require './../src/Navigator'
 expect = require 'expect.js'
 
-describe 'Navigator.js', ->
+describe 'Navigator', ->
 
     describe 'get', ->
 

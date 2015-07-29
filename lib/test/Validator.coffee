@@ -3,11 +3,12 @@
 # Apache2 Licensed
 ###
 
+# Dependencies
 expect = require 'expect.js'
 Validator = require './../src/Validator'
 Exceptions = require './../src/Exceptions'
 
-describe 'Validator.js', ->
+describe 'Validator', ->
 
     describe 'validate', ->
         street = '7th East'
