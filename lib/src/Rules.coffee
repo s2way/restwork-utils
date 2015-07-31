@@ -59,6 +59,9 @@ class Rules
     @isRegex: (value) ->
         _.isRegExp value
 
+    @isFunction: (value) ->
+        _.isFunction value
+
 # GENERIC rules
     @isEmpty: (value) ->
         _.isEmpty value

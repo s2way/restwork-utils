@@ -31,7 +31,7 @@ describe 'Watcher', ->
             task[Watcher.START] = ->
             task[Watcher.STOP] = ->
             instance.register task
-            expect(instance.tasks[task[Watcher.NAME]]).to.be task.name
+            expect(instance.tasks[task[Watcher.NAME]].task[Watcher.NAME]).to.be task.name
 
         it 'should throw an error if the start property it is not a function', ->
             task = {}
@@ -46,7 +46,7 @@ describe 'Watcher', ->
 
         it 'should throw an error if the stop property it is not a function', ->
             task = {}
-            task.na[Watcher.NAME] = goodTaskName
+            task[Watcher.NAME] = goodTaskName
             task[Watcher.START] = ->
             task[Watcher.STOP] = false
             expect( ->
@@ -106,12 +106,15 @@ describe 'Watcher', ->
     describe 'verify()', ->
 
         beforeEach ->
-        instance = new Watcher defaultParams
+            instance = new Watcher defaultParams
 
         it 'should check and log the status of a task', ->
             task = {}
             task[Watcher.NAME] = goodTaskName
             task[Watcher.START] = ->
             task[Watcher.STOP] = ->
-
             instance.register task
+
+            expect(instance.tasks[Watcher.LAST_RUN]).to.be.ok()
+            expect(instance.tasks[Watcher.COUNT]).to.be.ok()
+            expect(instance.tasks[Watcher.FAIL]).to.be.ok()

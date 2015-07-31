@@ -106,6 +106,12 @@ describe 'Rules', ->
         it 'should return false if value is not undefined', ->
             expect(Rules.isUndefined null).not.to.be.ok()
 
+    describe 'isFunction', ->
+        it 'should return true if value is a function', ->
+            expect(Rules.isFunction ->).to.be.ok()
+        it 'should return false if value is not a function', ->
+            expect(Rules.isFunction null).not.to.be.ok()
+
     describe 'notNull', ->
 
         it 'should return true if value is not null', ->

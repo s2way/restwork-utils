@@ -3,7 +3,38 @@
 # Apache2 Licensed
 ###
 
+# Dependencies
+Exceptions = require './Exceptions'
+Rules = require './Rules'
+
 class Watcher
+
+    @NAME: 'name'
+    @START: 'start'
+    @STOP: 'stop'
+    @REGEX_FUNCTION_NAME: /^[a-zA-Z]*$/
+
+    constructor: (params) ->
+        @tasks = {}
+        @name = '' || params?.name
+
+    _checkTask: (task) ->
+        if (Rules.isEmpty task[Watcher.NAME] or not Rules.regex task[Watcher.NAME], Watcher.REGEX_FUNCTION_NAME)
+            throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.NAME
+        throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.START unless Rules.isFunction task[Watcher.START]
+        throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.STOP unless Rules.isFunction task[Watcher.STOP]
+
+    register: (task) ->
+        @_checkTask task
+        obj =
+            task: task
+            meta:
+                createdAt: new Date().toISOString()
+                lastRun: ''
+                errors: 0
+                timeouts: 0
+
+        @tasks[task[Watcher.NAME]] = obj
 
     _launchTask: (task) ->
         task.init?()
