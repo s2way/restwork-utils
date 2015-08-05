@@ -10,13 +10,15 @@ Exceptions = require './../src/Exceptions'
 describe 'Watcher', ->
     expectedName = 'myGroupOfTasks'
     goodTaskName = 'myTask'
+    goodTaskName2 = 'yourTask'
     badTaskName = '{]error[}'
     instance = null
     defaultParams =
         name: expectedName
+    cbOk = (err) ->
+        expect(err).not.to.be.ok()
 
-
-    it 'sould be created with the specified name and interval', ->
+    it 'should be created with the specified name and interval', ->
         instance = new Watcher defaultParams
         expect(instance.name).to.be expectedName
 
@@ -25,46 +27,52 @@ describe 'Watcher', ->
         beforeEach ->
             instance = new Watcher defaultParams
 
-        it 'should add a new task', ->
+        it 'should throw an error if the callback is not a function', ->
             task = {}
             task[Watcher.NAME] = goodTaskName
             task[Watcher.START] = ->
             task[Watcher.STOP] = ->
-            instance.register task
-            expect(instance.tasks[task[Watcher.NAME]].task[Watcher.NAME]).to.be task.name
+            expect( ->
+                instance.register task
+            ).to.throwError((e) ->
+                expect(e.name).to.be Exceptions.INVALID_ARGUMENT
+            )
 
-        it 'should throw an error if the start property it is not a function', ->
+        it 'should add a new task', (done) ->
+            task = {}
+            task[Watcher.NAME] = goodTaskName
+            task[Watcher.START] = ->
+            task[Watcher.STOP] = ->
+            instance.register task, (err) ->
+                cbOk err
+                done()
+
+        it 'should return an error if the start property it is not a function', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
             task[Watcher.START] = false
             task[Watcher.STOP] = ->
-            expect( ->
-                instance.register task
-            ).to.throwError((e) ->
-                expect(e.name).to.be Exceptions.INVALID_ARGUMENT
-            )
+            instance.register task, (err) ->
+                expect(err.name).to.be Exceptions.INVALID_ARGUMENT
+                done()
 
-        it 'should throw an error if the stop property it is not a function', ->
+        it 'should throw an error if the stop property it is not a function', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
             task[Watcher.START] = ->
             task[Watcher.STOP] = false
-            expect( ->
-                instance.register task
-            ).to.throwError((e) ->
-                expect(e.name).to.be Exceptions.INVALID_ARGUMENT
-            )
+            instance.register task, (err) ->
+                expect(err.name).to.be Exceptions.INVALID_ARGUMENT
+                done()
 
-        it 'should throw an error if the name property it is not a valid string', ->
+        it 'should throw an error if the name property it is not a valid string', (done) ->
             task = {}
             task[Watcher.NAME] = badTaskName
             task[Watcher.START] = ->
             task[Watcher.STOP] = ->
-            expect( ->
-                instance.register task
-            ).to.throwError((e) ->
-                expect(e.name).to.be Exceptions.INVALID_ARGUMENT
-            )
+            instance.register task, (err) ->
+                expect(err.name).to.be Exceptions.INVALID_ARGUMENT
+                done()
 
     describe 'unRegister()', ->
 
@@ -75,46 +83,82 @@ describe 'Watcher', ->
             task = {}
             task[Watcher.NAME] = goodTaskName
             task[Watcher.START] = ->
-            task[Watcher.STOP] = ->
-            instance.register task
-            callback = (err) ->
-                expect(err).not.be.ok()
-                done()
-            instance.unRegister task, callback
+            task[Watcher.STOP] = (emiter, next) ->
+                next()
+
+            instance.register task, (err) ->
+                expect(err).not.to.be.ok()
+                instance.unRegister goodTaskName, (err) ->
+                    cbOk err
+                    done()
 
         it 'should return error if the task was not be found', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
             task[Watcher.START] = ->
-            task[Watcher.STOP] = ->
-            callback = (err) ->
-                expect(err).to.be.ok()
+            task[Watcher.STOP] = (emiter, next) ->
+                next()
+
+            instance.unRegister goodTaskName, (err) ->
+                expect(err.name).to.be Exceptions.NOT_FOUND
                 done()
-            instance.unRegister task, callback
 
         it 'should return error if while trying to stop the task a timeout has occurred', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
             task[Watcher.START] = ->
-            task[Watcher.STOP] = ->
-            instance.register task
-            callback = (err) ->
-                expect(err).to.be.ok()
-                done()
-            instance.unRegister task, callback
+            task[Watcher.TIMEOUT] = 1
+            task[Watcher.STOP] = (emiter, next) ->
 
-    describe 'verify()', ->
+            instance.register task, (err) ->
+                expect(err).not.to.be.ok()
+                instance.unRegister goodTaskName, (err) ->
+                    expect(err.name).to.be Exceptions.TIMEOUT
+                    done()
+
+    describe 'status()', ->
 
         beforeEach ->
-            instance = new Watcher defaultParams
+        instance = new Watcher defaultParams
 
-        it 'should check and log the status of a task', ->
-            task = {}
-            task[Watcher.NAME] = goodTaskName
-            task[Watcher.START] = ->
-            task[Watcher.STOP] = ->
-            instance.register task
+        it 'should return the all data about the tasks', ->
+            task1 = {}
+            task1[Watcher.NAME] = goodTaskName
+            task1[Watcher.START] = ->
+            task1[Watcher.STOP] = (emiter, next) ->
+                next()
+            instance.register task1, (err) ->
+                expect(err).not.to.be.ok()
+            task2 = {}
+            task2[Watcher.NAME] = goodTaskName2
+            task2[Watcher.START] = ->
+            task2[Watcher.STOP] = (emiter, next) ->
+                next()
+            instance.register task2, (err) ->
+                expect(err).not.to.be.ok()
 
-            expect(instance.tasks[Watcher.LAST_RUN]).to.be.ok()
-            expect(instance.tasks[Watcher.COUNT]).to.be.ok()
-            expect(instance.tasks[Watcher.FAIL]).to.be.ok()
+            expect(instance.status().indexOf goodTaskName).to.be.ok()
+
+    describe 'taskStatus()', ->
+
+        beforeEach ->
+        instance = new Watcher defaultParams
+
+        it 'should return the all data about the task or undefined if was not found', ->
+            task1 = {}
+            task1[Watcher.NAME] = goodTaskName
+            task1[Watcher.START] = ->
+            task1[Watcher.STOP] = (emiter, next) ->
+                next()
+            instance.register task1, (err) ->
+                expect(err).not.to.be.ok()
+            task2 = {}
+            task2[Watcher.NAME] = goodTaskName2
+            task2[Watcher.START] = ->
+            task2[Watcher.STOP] = (emiter, next) ->
+                next()
+            instance.register task2, (err) ->
+                expect(err).not.to.be.ok()
+
+            expect(instance.taskStatus(goodTaskName).indexOf goodTaskName).to.be.ok()
+            expect(instance.taskStatus('badTaskName')).not.to.be.ok()
