@@ -30,7 +30,8 @@ describe 'Watcher', ->
         it 'should throw an error if the callback is not a function', ->
             task = {}
             task[Watcher.NAME] = goodTaskName
-            task[Watcher.START] = ->
+            task[Watcher.INTERVAL] = 1000
+            task[Watcher.RUN] = ->
             task[Watcher.STOP] = ->
             expect( ->
                 instance.register task
@@ -41,16 +42,18 @@ describe 'Watcher', ->
         it 'should add a new task', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
-            task[Watcher.START] = ->
+            task[Watcher.INTERVAL] = 1000
+            task[Watcher.RUN] = ->
             task[Watcher.STOP] = ->
             instance.register task, (err) ->
                 cbOk err
                 done()
 
-        it 'should return an error if the start property it is not a function', (done) ->
+        it 'should return an error if the run property it is not a function', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
-            task[Watcher.START] = false
+            task[Watcher.INTERVAL] = 1000
+            task[Watcher.RUN] = false
             task[Watcher.STOP] = ->
             instance.register task, (err) ->
                 expect(err.name).to.be Exceptions.INVALID_ARGUMENT
@@ -59,7 +62,18 @@ describe 'Watcher', ->
         it 'should throw an error if the stop property it is not a function', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
-            task[Watcher.START] = ->
+            task[Watcher.INTERVAL] = 1000
+            task[Watcher.RUN] = ->
+            task[Watcher.STOP] = false
+            instance.register task, (err) ->
+                expect(err.name).to.be Exceptions.INVALID_ARGUMENT
+                done()
+
+        it 'should throw an error if the interval property it is not an integer', (done) ->
+            task = {}
+            task[Watcher.NAME] = goodTaskName
+            task[Watcher.INTERVAL] = 'error'
+            task[Watcher.RUN] = ->
             task[Watcher.STOP] = false
             instance.register task, (err) ->
                 expect(err.name).to.be Exceptions.INVALID_ARGUMENT
@@ -68,7 +82,8 @@ describe 'Watcher', ->
         it 'should throw an error if the name property it is not a valid string', (done) ->
             task = {}
             task[Watcher.NAME] = badTaskName
-            task[Watcher.START] = ->
+            task[Watcher.INTERVAL] = 1000
+            task[Watcher.RUN] = ->
             task[Watcher.STOP] = ->
             instance.register task, (err) ->
                 expect(err.name).to.be Exceptions.INVALID_ARGUMENT
@@ -82,7 +97,8 @@ describe 'Watcher', ->
         it 'should return true if the task was removed', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
-            task[Watcher.START] = ->
+            task[Watcher.INTERVAL] = 1000
+            task[Watcher.RUN] = ->
             task[Watcher.STOP] = (emiter, next) ->
                 next()
 
@@ -90,12 +106,14 @@ describe 'Watcher', ->
                 expect(err).not.to.be.ok()
                 instance.unRegister goodTaskName, (err) ->
                     cbOk err
+                    expect(instance.status()).to.be '{}'
                     done()
 
         it 'should return error if the task was not be found', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
-            task[Watcher.START] = ->
+            task[Watcher.INTERVAL] = 1000
+            task[Watcher.RUN] = ->
             task[Watcher.STOP] = (emiter, next) ->
                 next()
 
@@ -106,7 +124,8 @@ describe 'Watcher', ->
         it 'should return error if while trying to stop the task a timeout has occurred', (done) ->
             task = {}
             task[Watcher.NAME] = goodTaskName
-            task[Watcher.START] = ->
+            task[Watcher.INTERVAL] = 1000
+            task[Watcher.RUN] = ->
             task[Watcher.TIMEOUT] = 1
             task[Watcher.STOP] = (emiter, next) ->
 
@@ -124,14 +143,16 @@ describe 'Watcher', ->
         it 'should return the all data about the tasks', ->
             task1 = {}
             task1[Watcher.NAME] = goodTaskName
-            task1[Watcher.START] = ->
+            task1[Watcher.INTERVAL] = 1000
+            task1[Watcher.RUN] = ->
             task1[Watcher.STOP] = (emiter, next) ->
                 next()
             instance.register task1, (err) ->
                 expect(err).not.to.be.ok()
             task2 = {}
             task2[Watcher.NAME] = goodTaskName2
-            task2[Watcher.START] = ->
+            task2[Watcher.INTERVAL] = 1000
+            task2[Watcher.RUN] = ->
             task2[Watcher.STOP] = (emiter, next) ->
                 next()
             instance.register task2, (err) ->
@@ -147,14 +168,16 @@ describe 'Watcher', ->
         it 'should return the all data about the task or undefined if was not found', ->
             task1 = {}
             task1[Watcher.NAME] = goodTaskName
-            task1[Watcher.START] = ->
+            task1[Watcher.INTERVAL] = 1000
+            task1[Watcher.RUN] = ->
             task1[Watcher.STOP] = (emiter, next) ->
                 next()
             instance.register task1, (err) ->
                 expect(err).not.to.be.ok()
             task2 = {}
             task2[Watcher.NAME] = goodTaskName2
-            task2[Watcher.START] = ->
+            task2[Watcher.INTERVAL] = 1000
+            task2[Watcher.RUN] = ->
             task2[Watcher.STOP] = (emiter, next) ->
                 next()
             instance.register task2, (err) ->

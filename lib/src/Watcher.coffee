@@ -7,19 +7,24 @@
 Exceptions = require './Exceptions'
 Rules = require './Rules'
 events = require 'events'
+http = require 'http'
 
 class Watcher
 
     @NAME: 'name'
-    @START: 'start'
+    @RUN: 'run'
     @STOP: 'stop'
     @INIT: 'init'
+    @INTERVAL: 'interval'
     @TIMEOUT: 'timeout'
     @REGEX_FUNCTION_NAME: /^[a-zA-Z]*$/
     @DEFAULT_TIMEOUT: 10000
 
     constructor: (params) ->
         @tasks = {}
+        @runners = {}
+        @observers = {}
+        @stop = false
         @name = '' || params?.name
 
     _checkArgs: (task, callback) ->
@@ -28,28 +33,40 @@ class Watcher
         return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.NAME if Rules.isEmpty name
         unless Rules.regex name, Watcher.REGEX_FUNCTION_NAME
             return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.NAME
-        unless Rules.isFunction task[Watcher.START]
-            return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.START
+        unless Rules.isFunction task[Watcher.RUN]
+            return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.RUN
         unless Rules.isFunction task[Watcher.STOP]
             return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.STOP
+        if not Rules.isInteger task[Watcher.INTERVAL] or task[Watcher.INTERVAL] <= 0
+            return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.INTERVAL
 
     register: (task, callback) ->
         error = @_checkArgs task, callback
         return callback error if error
+        name = task[Watcher.NAME]
+        start = new Date().toISOString()
         obj =
             task: task
             meta:
                 isLocked: false
             info:
-                createdAt: new Date().toISOString()
-                lastError: ''
-                lastSuccess: ''
-                lastTimeout: ''
+                createdAt: start
+                lastError: null
+                lastSuccess: null
+                lastTimeout: null
+                lastWatchDog: start
+                lastWatchDogCheck: start
             counters:
                 error: 0
                 success: 0
                 timeout: 0
+                fails: 0
             events: new events.EventEmitter
+
+        # TODO: implement a function to call on task object when timeout occurred
+        cbWatchFail = () ->
+            obj.counters.fails++ if obj.info.lastWatchDogCheck.toString() is obj.info.lastWatchDog.toString()
+            obj.info.lastWatchDogCheck = obj.info.lastWatchDog
 
         obj.events.addListener 'success', ->
             obj.info.lastSuccess = new Date().toISOString()
@@ -66,7 +83,13 @@ class Watcher
             obj.counters.timeout++
             obj.meta.isLocked = false
 
-        @tasks[task[Watcher.NAME]] = obj
+        obj.events.addListener 'watchdog', ->
+            obj.info.lastWatchDog = new Date().toISOString()
+
+        @tasks[name] = obj
+        @observers[name] = setInterval cbWatchFail, task[Watcher.TIMEOUT]
+
+        @_launchTask obj
 
         return task[Watcher.INIT](callback) if task[Watcher.INIT]
         return callback()
@@ -76,10 +99,19 @@ class Watcher
         notFoundTask = Rules.isEmpty task
         return callback new Exceptions.Error Exceptions.NOT_FOUND, taskName if notFoundTask
         timeout = @_timeout callback, task.task[Watcher.TIMEOUT]
-        cbStop = (err) ->
-            timeout = null
+        cbStop = (err) =>
+            clearTimeout timeout
+            @_removeTask taskName unless err
             return callback err
         task.task[Watcher.STOP](task.events, cbStop)
+
+    _removeTask: (taskName) ->
+        @tasks[taskName].events.removeAllListeners()
+        delete @tasks[taskName]
+        clearInterval @runners[taskName]
+        delete @runners[taskName]
+        clearInterval @observers[taskName]
+        delete @observers[taskName]
 
     _timeout: (callback, timeout = Watcher.DEFAULT_TIMEOUT) ->
         watch = setTimeout () ->
@@ -93,48 +125,18 @@ class Watcher
     taskStatus: (taskName) ->
         return JSON.stringify @tasks[taskName]
 
+    _launchTask: (taskObj) ->
+        name = taskObj.task[Watcher.NAME]
+        interval = taskObj.task[Watcher.INTERVAL]
+        # TODO: log info "Task: [#{name}] was registered. [every = #{interval}]"
 
-#    _launchTask: (task) ->
-#        task.init?()
-#        name = task[EXEC_NAME]
-#        interval = task[EXEC_INTERVAL]
-#        run = EXEC_RUN
-#
-#        @tasks++
-#
-#        task.__failsToWarn = task[FAILS_TO_WARN] || 0
-#        task.__failsToError = task[FAILS_TO_ERROR] || 0
-#        task.__logEvery = task[LOG_EVERY] || 0
-#        task.__logTrigger = 0
-#        task.__failCounter = 0
-#        task.__successCounter = 0
-#        task.__status = 0
-#        task.__isLocked = false
-#        task.__emiter = new events.EventEmitter
-#
-#        task.__emiter.addListener 'success', ->
-#            task.__successCounter++
-#            task.__isLocked = false
-#
-#        task.__emiter.addListener 'error', ->
-#            task.__failCounter++
-#            task.__status = 1 if task.__failCounter >= task.__failsToWarn and task.__status is 0
-#            task.__status = 2 if task.__failCounter >= task.__failsToError and task.__status is 1
-#            task.__isLocked = false
-#
-#        @_log "Task: [#{name}] was registered. [every = #{interval}]"
-#
-#        @_timers.push setInterval (@_logger) ->
-#            task.__logTrigger++ if !task.__isLocked
-#
-#            if task.__logTrigger >= task.__logEvery
-#                @_logger?.log? "Task: [#{name}] was invoked. [#{task.__logTrigger}]"
-#                task.__logTrigger = 0
-#
-#            unless task.__isLocked
-#                task.__isLocked = true
-#                task[run](task.__emiter)
-#        , interval, @_serverLogger
-
+        @runners[name] = setInterval (taskObj) ->
+            unless taskObj.meta.isLocked
+                taskObj.meta.isLocked = true
+                taskObj.task[Watcher.RUN](taskObj.events)
+                console.log "Task: [#{taskObj.task[Watcher.NAME]}] trying to invoke. "
+            else
+                console.log "Task: [#{taskObj.task[Watcher.NAME]}] blocked. "
+        , taskObj.task[Watcher.INTERVAL], taskObj
 
 module.exports = Watcher
