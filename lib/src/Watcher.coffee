@@ -6,77 +6,137 @@
 # Dependencies
 Exceptions = require './Exceptions'
 Rules = require './Rules'
+events = require 'events'
+http = require 'http'
 
 class Watcher
 
     @NAME: 'name'
-    @START: 'start'
+    @RUN: 'run'
     @STOP: 'stop'
+    @INIT: 'init'
+    @INTERVAL: 'interval'
+    @TIMEOUT: 'timeout'
     @REGEX_FUNCTION_NAME: /^[a-zA-Z]*$/
+    @DEFAULT_TIMEOUT: 10000
 
     constructor: (params) ->
         @tasks = {}
+        @runners = {}
+        @observers = {}
+        @stop = false
         @name = '' || params?.name
 
-    _checkTask: (task) ->
-        if (Rules.isEmpty task[Watcher.NAME] or not Rules.regex task[Watcher.NAME], Watcher.REGEX_FUNCTION_NAME)
-            throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.NAME
-        throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.START unless Rules.isFunction task[Watcher.START]
-        throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.STOP unless Rules.isFunction task[Watcher.STOP]
+    _checkArgs: (task, callback) ->
+        name = task[Watcher.NAME]
+        throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, 'callback' unless Rules.isFunction callback
+        return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.NAME if Rules.isEmpty name
+        unless Rules.regex name, Watcher.REGEX_FUNCTION_NAME
+            return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.NAME
+        unless Rules.isFunction task[Watcher.RUN]
+            return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.RUN
+        unless Rules.isFunction task[Watcher.STOP]
+            return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.STOP
+        if not Rules.isInteger task[Watcher.INTERVAL] or task[Watcher.INTERVAL] <= 0
+            return new Exceptions.Error Exceptions.INVALID_ARGUMENT, Watcher.INTERVAL
 
-    register: (task) ->
-        @_checkTask task
+    register: (task, callback) ->
+        error = @_checkArgs task, callback
+        return callback error if error
+        name = task[Watcher.NAME]
+        start = new Date().toISOString()
         obj =
             task: task
             meta:
-                createdAt: new Date().toISOString()
-                lastRun: ''
-                errors: 0
-                timeouts: 0
+                isLocked: false
+            info:
+                createdAt: start
+                lastError: null
+                lastSuccess: null
+                lastTimeout: null
+                lastWatchDog: start
+                lastWatchDogCheck: start
+            counters:
+                error: 0
+                success: 0
+                timeout: 0
+                fails: 0
+            events: new events.EventEmitter
 
-        @tasks[task[Watcher.NAME]] = obj
+        # TODO: implement a function to call on task object when timeout occurred
+        cbWatchFail = () ->
+            obj.counters.fails++ if obj.info.lastWatchDogCheck.toString() is obj.info.lastWatchDog.toString()
+            obj.info.lastWatchDogCheck = obj.info.lastWatchDog
 
-    _launchTask: (task) ->
-        task.init?()
-        name = task[EXEC_NAME]
-        interval = task[EXEC_INTERVAL]
-        run = EXEC_RUN
+        obj.events.addListener 'success', ->
+            obj.info.lastSuccess = new Date().toISOString()
+            obj.counters.success++
+            obj.meta.isLocked = false
 
-        @tasks++
+        obj.events.addListener 'error', ->
+            obj.info.lastError = new Date().toISOString()
+            obj.counters.error++
+            obj.meta.isLocked = false
 
-        task.__failsToWarn = task[FAILS_TO_WARN] || 0
-        task.__failsToError = task[FAILS_TO_ERROR] || 0
-        task.__logEvery = task[LOG_EVERY] || 0
-        task.__logTrigger = 0
-        task.__failCounter = 0
-        task.__successCounter = 0
-        task.__status = 0
-        task.__isLocked = false
-        task.__emiter = new events.EventEmitter
+        obj.events.addListener 'timeout', ->
+            obj.info.lastTimeout = new Date().toISOString()
+            obj.counters.timeout++
+            obj.meta.isLocked = false
 
-        task.__emiter.addListener 'success', ->
-            task.__successCounter++
-            task.__isLocked = false
+        obj.events.addListener 'watchdog', ->
+            obj.info.lastWatchDog = new Date().toISOString()
 
-        task.__emiter.addListener 'error', ->
-            task.__failCounter++
-            task.__status = 1 if task.__failCounter >= task.__failsToWarn and task.__status is 0
-            task.__status = 2 if task.__failCounter >= task.__failsToError and task.__status is 1
-            task.__isLocked = false
+        @tasks[name] = obj
+        @observers[name] = setInterval cbWatchFail, task[Watcher.TIMEOUT]
 
-        @_log "Task: [#{name}] was registered. [every = #{interval}]"
+        @_launchTask obj
 
-        @_timers.push setInterval (@_logger) ->
-            task.__logTrigger++ if !task.__isLocked
+        return task[Watcher.INIT](callback) if task[Watcher.INIT]
+        return callback()
 
-            if task.__logTrigger >= task.__logEvery
-                @_logger?.log? "Task: [#{name}] was invoked. [#{task.__logTrigger}]"
-                task.__logTrigger = 0
+    unRegister: (taskName, callback) ->
+        task = @tasks[taskName]
+        notFoundTask = Rules.isEmpty task
+        return callback new Exceptions.Error Exceptions.NOT_FOUND, taskName if notFoundTask
+        timeout = @_timeout callback, task.task[Watcher.TIMEOUT]
+        cbStop = (err) =>
+            clearTimeout timeout
+            @_removeTask taskName unless err
+            return callback err
+        task.task[Watcher.STOP](task.events, cbStop)
 
-            unless task.__isLocked
-                task.__isLocked = true
-                task[run](task.__emiter)
-        , interval, @_serverLogger
+    _removeTask: (taskName) ->
+        @tasks[taskName].events.removeAllListeners()
+        delete @tasks[taskName]
+        clearInterval @runners[taskName]
+        delete @runners[taskName]
+        clearInterval @observers[taskName]
+        delete @observers[taskName]
 
+    _timeout: (callback, timeout = Watcher.DEFAULT_TIMEOUT) ->
+        watch = setTimeout () ->
+            return callback new Exceptions.Error Exceptions.TIMEOUT
+        , timeout
+        return watch
+
+    status: () ->
+        return JSON.stringify @tasks
+
+    taskStatus: (taskName) ->
+        return JSON.stringify @tasks[taskName]
+
+    _launchTask: (taskObj) ->
+        name = taskObj.task[Watcher.NAME]
+        interval = taskObj.task[Watcher.INTERVAL]
+        # TODO: log info "Task: [#{name}] was registered. [every = #{interval}]"
+
+        @runners[name] = setInterval (taskObj) ->
+            unless taskObj.meta.isLocked
+                taskObj.meta.isLocked = true
+                taskObj.task[Watcher.RUN](taskObj.events)
+                console.log "Task: [#{taskObj.task[Watcher.NAME]}] trying to invoke. "
+            else
+                console.log "Task: [#{taskObj.task[Watcher.NAME]}] blocked. "
+        , taskObj.task[Watcher.INTERVAL], taskObj
 
 module.exports = Watcher

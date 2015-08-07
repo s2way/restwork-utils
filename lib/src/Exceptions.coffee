@@ -15,6 +15,8 @@ class Exceptions
     @NO_SRC_FILE: 'Source is missing or it is not a file'
     @INVALID_OBJECT: 'Invalid object'
     @INVALID_ARGUMENT: 'Invalid argument'
+    @NOT_FOUND: 'Not found'
+    @TIMEOUT: 'Timeout'
 
     @Fatal: (@name, @message = '') ->
         @type = Exceptions.TYPE_FATAL

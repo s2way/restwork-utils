@@ -52,6 +52,7 @@
   "dependencies": {
     "better-require": "git://github.com/Moharu/better-require.git",
     "moment": "^2.10.3",
+    "textchocolate": "^0.1.1",
     "underscore": "^1.8.3",
     "xml2js": "^0.4.9"
   }
