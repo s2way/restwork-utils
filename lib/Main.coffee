@@ -11,3 +11,7 @@ module.exports.Rules = require './src/Rules'
 module.exports.SystemInfo = require './src/SystemInfo'
 module.exports.XML = require './src/XML'
 module.exports.Watcher = require './src/Watcher'
+module.exports.Connectors = {}
+module.exports.Connectors.Fs = require './src/connectors/Fs'
+module.exports.Connectors.Http = require './src/connectors/Http'
+module.exports.Connectors.MySQL = require './src/connectors/MySQL'

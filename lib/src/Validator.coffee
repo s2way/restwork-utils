@@ -18,10 +18,10 @@ class Validator
     @PARAMS_SKIP_MATCH: 'skipMatch'
 
     # @param {object} params MUST contain the validation rules (validate property) and may contain the timeout(ms)
-    constructor: (params = {}, deps) ->
+    constructor: (params = {}, container) ->
         # Injectable dependencies - tests only because it is lazy instantiate
-        @Rules = deps?.Rules || require './Rules'
-        @Navigator =  deps?.Navigator || require './Navigator'
+        @Rules = container?.Rules || require './Rules'
+        @Navigator =  container?.Navigator || require './Navigator'
 
         # Defaults
         @timeout = params[Validator.PARAMS_TIMEOUT] ? Validator.DEFAULT_TIMEOUT

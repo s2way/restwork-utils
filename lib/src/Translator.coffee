@@ -1,7 +1,7 @@
 class Message
 
-    constructor: (strings, lang, deps) ->
-        TextChocolate = deps?.TextChocolate || require 'textchocolate'
+    constructor: (strings, lang, container) ->
+        TextChocolate = container?.TextChocolate || require 'textchocolate'
         @tc = new TextChocolate strings, lang if strings
 
     get: (message, type, lang) ->
