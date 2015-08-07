@@ -14,7 +14,7 @@ describe 'the MySQLConnector,', ->
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
-                expect(e.message).to.be 'Missing arguments'
+                expect(e.message).to.be.ok()
             )
 
         it 'should throw an exception if host is not useful', ->
@@ -31,7 +31,7 @@ describe 'the MySQLConnector,', ->
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
-                expect(e.message).to.be 'Missing one or more arguments'
+                expect(e.message).to.be.ok()
             )
 
         it 'should throw an exception if domain is not useful', ->
@@ -48,7 +48,7 @@ describe 'the MySQLConnector,', ->
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
-                expect(e.message).to.be 'Missing one or more arguments'
+                expect(e.message).to.be.ok()
             )
 
         it 'should throw an exception if resource is not useful', ->
@@ -65,7 +65,7 @@ describe 'the MySQLConnector,', ->
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
-                expect(e.message).to.be 'Missing one or more arguments'
+                expect(e.message).to.be.ok()
             )
 
         it 'should throw an exception if user is not useful', ->
@@ -82,7 +82,7 @@ describe 'the MySQLConnector,', ->
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
-                expect(e.message).to.be 'Missing one or more arguments'
+                expect(e.message).to.be.ok()
             )
 
         it 'should throw an exception if poolSize is not useful', ->
@@ -99,7 +99,7 @@ describe 'the MySQLConnector,', ->
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
-                expect(e.message).to.be 'Missing one or more arguments'
+                expect(e.message).to.be.ok()
             )
 
         it 'should verify if the connection pool was created', ->
@@ -150,7 +150,7 @@ describe 'the MySQLConnector,', ->
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
-                expect(e.message).to.be 'Missing one or more arguments'
+                expect(e.message).to.be.ok()
             )
 
     describe 'when reading a order', ->
