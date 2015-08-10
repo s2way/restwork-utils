@@ -5,7 +5,22 @@ expect = require 'expect.js'
 
 describe 'the MySQLConnector,', ->
 
+    params = null
+
+    beforeEach ->
+        params =
+            host : 'host'
+            poolSize : 1
+            timeout : 10000
+            user: 'user'
+            password: 'password'
+            domain: 'databaseName'
+            resource: 'tableName'
+
     describe 'when creating a new instance', ->
+
+        beforeEach ->
+            params = null
 
         it 'should throw an exception if one or more params was not passed', ->
 
@@ -155,26 +170,12 @@ describe 'the MySQLConnector,', ->
 
     describe 'when reading a order', ->
 
-        params = null
-
-        beforeEach ->
-
-            params =
-                host : 'host'
-                poolSize : 1
-                timeout : 10000
-                user: 'user'
-                password: 'password'
-                domain: 'databaseName'
-                resource: 'tableName'
-
-
         it 'should return an error if the order id is null', (done) ->
 
             expectedError = 'Invalid id'
 
             connector = new MySQLConnector params
-            connector.read null, (error, response) ->
+            connector.readById null, (error, response) ->
                 expect(error).to.eql expectedError
                 expect(response).not.to.be.ok()
                 done()
@@ -184,7 +185,7 @@ describe 'the MySQLConnector,', ->
             expectedError = 'Invalid id'
 
             connector = new MySQLConnector params
-            connector.read undefined, (error, response) ->
+            connector.readById undefined, (error, response) ->
                 expect(error).to.eql expectedError
                 expect(response).not.to.be.ok()
                 done()
@@ -194,7 +195,7 @@ describe 'the MySQLConnector,', ->
             expectedError = 'Invalid id'
 
             connector = new MySQLConnector params
-            connector.read 0, (error, response) ->
+            connector.readById 0, (error, response) ->
                 expect(error).to.eql expectedError
                 expect(response).not.to.be.ok()
                 done()
@@ -211,7 +212,7 @@ describe 'the MySQLConnector,', ->
                             callback 'Error to get connection'
 
             connector = new MySQLConnector params, deps
-            connector.read 1, (error, response) ->
+            connector.readById 1, (error, response) ->
                 expect(error).to.eql expectedError
                 expect(response).not.to.be.ok()
                 done()
@@ -239,7 +240,7 @@ describe 'the MySQLConnector,', ->
             connector._selectDatabase = (databaseName, connection, callback)->
                 callback()
 
-            connector.read 1, (error, response) ->
+            connector.readById 1, (error, response) ->
                 expect(error).to.eql expectedError
                 expect(response).not.to.be.ok()
                 expect(releaseMethodCalled).to.be yes
@@ -263,7 +264,7 @@ describe 'the MySQLConnector,', ->
                             callback null, mockedConnection
 
             connector = new MySQLConnector params, deps
-            connector.read 1, (error, response) ->
+            connector.readById 1, (error, response) ->
                 expect(error).not.to.be.ok()
                 expect(response).to.eql expectedRow
                 done()
@@ -286,7 +287,7 @@ describe 'the MySQLConnector,', ->
                             callback null, mockedConnection
 
             connector = new MySQLConnector params, deps
-            connector.read 1, (error, response) ->
+            connector.readById 1, (error, response) ->
                 expect(error).not.to.be 'NOT FOUND'
                 expect(response).not.to.be.ok()
                 done()
@@ -311,26 +312,12 @@ describe 'the MySQLConnector,', ->
             connector._selectDatabase = (databaseName, connection, callback)->
                 callback expectedError
 
-            connector.read 1, (error, response) ->
+            connector.readById 1, (error, response) ->
                 expect(error).to.eql expectedError
                 expect(response).not.to.be.ok()
                 done()
 
      describe 'when creating an order', ->
-
-        params = null
-
-        beforeEach ->
-
-            params =
-                host : 'host'
-                poolSize : 1
-                timeout : 10000
-                user: 'user'
-                password: 'password'
-                domain: 'databaseName'
-                resource: 'tableName'
-
 
         it 'should return an error if the order data is null', (done) ->
 
@@ -439,19 +426,86 @@ describe 'the MySQLConnector,', ->
 
             connector.create data, ->
 
+    describe 'when reading an order', ->
+
+        it 'should hand the mysql error to the callback', (done) ->
+
+            expectedError = 'Value too large for defined data type'
+
+            mockedConnection =
+                query: (query, params, callback) ->
+                    callback expectedError
+                release: ->
+
+            deps =
+                mysql:
+                    createPool: (params) ->
+                        getConnection: (callback) ->
+                            callback null, mockedConnection
+
+            connector = new MySQLConnector params, deps
+            connector._selectDatabase = (databaseName, connection, callback)->
+                callback null, mockedConnection
+
+            connector.read 'SELECT size FROM yo_mama', (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return a NOT FOUND error if nothing was found (obviously)', (done) ->
+
+            expectedError =
+                name: 'Not found'
+                message: ''
+                type: 'Error'
+
+            mockedConnection =
+                query: (query, params, callback) ->
+                    callback()
+                release: ->
+
+            deps =
+                mysql:
+                    createPool: (params) ->
+                        getConnection: (callback) ->
+                            callback null, mockedConnection
+
+            connector = new MySQLConnector params, deps
+            connector._selectDatabase = (databaseName, connection, callback)->
+                callback null, mockedConnection
+
+            connector.read 'SELECT weight_reduction FROM yo_mama', (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return the order found', (done) ->
+
+            expectedOrder =
+                this: 'is'
+                your: 'order'
+
+            mockedConnection =
+                query: (query, params, callback) ->
+                    callback null, expectedOrder
+                release: ->
+
+            deps =
+                mysql:
+                    createPool: (params) ->
+                        getConnection: (callback) ->
+                            callback null, mockedConnection
+
+            connector = new MySQLConnector params, deps
+            connector._selectDatabase = (databaseName, connection, callback)->
+                callback null, mockedConnection
+
+            connector.read 'SELECT weight_reduction FROM yo_mama', (error, response) ->
+                expect(error).not.to.be.ok()
+                expect(response).to.eql expectedOrder
+                done()
+
     describe 'when updating an order', ->
-        params = null
-
-        beforeEach ->
-
-            params =
-                host : 'host'
-                poolSize : 1
-                timeout : 10000
-                user: 'user'
-                password: 'password'
-                domain: 'databaseName'
-                resource: 'tableName'
 
         it 'deve receber um erro se o id for undefined', (done) ->
             expectedError = 'Invalid id'
