@@ -14,6 +14,7 @@ class MySQLConnector
     @DATABASE: 'domain'
     @TABLE: 'resource'
     @DEFAULT_TIMEOUT: 10000
+    NOT_FOUND_ERROR = 'NOT_FOUND'
 
     constructor: (params, container) ->
 
@@ -71,9 +72,9 @@ class MySQLConnector
             values.push value
         fields = fields.substr 0,fields.length-1
 
-        @_execute "INSERT INTO #{@table} SET #{fields}", values, (err, row) ->
+        @_execute "INSERT INTO #{@table} SET #{fields}", values, (err) ->
             return callback err if err?
-            return callback null, row
+            return callback()
 
     update:(id, data, callback) ->
         return callback 'Invalid id' if !@rules.isUseful(id) or @rules.isZero id
