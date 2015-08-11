@@ -249,7 +249,7 @@ describe 'the MySQLConnector,', ->
         it 'should return the found row', (done) ->
 
             expectedRow =
-                costumer_number: 1
+                reference: 1
                 amount: 100
 
             mockedConnection =
@@ -272,7 +272,7 @@ describe 'the MySQLConnector,', ->
         it 'should return a NOT_FOUND error if nothing was found', (done) ->
 
             expectedRow =
-                costumer_number: 1
+                reference: 1
                 amount: 100
 
             mockedConnection =
@@ -372,7 +372,7 @@ describe 'the MySQLConnector,', ->
 
             data =
                id : 101
-               costumer_number: 321321
+               reference: 321321
                seq_code_status: 1
                description: "Teste recarga"
                return_url: "www.google.com"
@@ -393,7 +393,7 @@ describe 'the MySQLConnector,', ->
         it 'should pass the expected Query and Params', (done) ->
 
             expectedQuery = 'INSERT INTO tableName SET id=?'
-            expectedQuery += ',costumer_number=?,seq_code_status=?,description=?,return_url=?'
+            expectedQuery += ',reference=?,seq_code_status=?,description=?,return_url=?'
             expectedQuery += ',amount=?,payment_type=?,installments=?'
             
             expectedParams = [
@@ -409,7 +409,7 @@ describe 'the MySQLConnector,', ->
 
             data =
                id : 101
-               costumer_number: 321321
+               reference: 321321
                seq_code_status: 1
                description: "Teste recarga"
                return_url: "www.google.com"
