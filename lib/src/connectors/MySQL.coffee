@@ -113,6 +113,36 @@ class MySQLConnector
 
     changeTable: (tableName) ->
         @table = tableName
+
+    readJoin: (id, params, callback) ->
+        return callback 'Invalid id' if !@rules.isUseful(id) or @rules.isZero id
+
+        joinTable = params?.table || null
+        condition = params?.condition || null
+        fields = params?.fields || null
+
+        if !@rules.isUseful(joinTable) or !@rules.isUseful(condition) or !@rules.isUseful(fields)
+            return callback 'Invalid join parameters'
+
+        if params?.orderBy
+            orderBy =  "ORDER BY #{params.orderBy}"
+        if params?.limit
+            limit = "LIMIT #{params.limit}"
+
+        selectFields = ''
+
+        for key in fields
+            selectFields += "#{key},"
+
+        selectFields = selectFields.substring(0, selectFields.length-1)
+
+        query = "SELECT #{selectFields} FROM #{@table} JOIN #{joinTable} ON #{condition} WHERE #{@table}.id = ? #{orderBy} #{limit}"
+
+        @_execute query, [id], (err, row) =>
+            return callback err if err?
+            return callback null, row if @rules.isUseful(row)
+            return callback NOT_FOUND_ERROR
+
     # createMany
     # readMany
     # update
