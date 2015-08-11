@@ -61,7 +61,7 @@ class MySQLConnector
         @_execute query, [], (err, row) =>
             return callback err if err?
             return callback null, row if @rules.isUseful(row)
-            return callback new @Exceptions.Error @Exceptions.NOT_FOUND
+            return callback()
 
     create: (data, callback) ->
         return callback 'Invalid data' if !@rules.isUseful(data)

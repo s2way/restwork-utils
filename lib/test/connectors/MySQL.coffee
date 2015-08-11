@@ -572,11 +572,6 @@ describe 'the MySQLConnector,', ->
 
         it 'should return a NOT FOUND error if nothing was found (obviously)', (done) ->
 
-            expectedError =
-                name: 'Not found'
-                message: ''
-                type: 'Error'
-
             mockedConnection =
                 query: (query, params, callback) ->
                     callback()
@@ -593,7 +588,7 @@ describe 'the MySQLConnector,', ->
                 callback null, mockedConnection
 
             connector.read 'SELECT weight_reduction FROM yo_mama', (error, response) ->
-                expect(error).to.eql expectedError
+                expect(error).not.to.be.ok()
                 expect(response).not.to.be.ok()
                 done()
 

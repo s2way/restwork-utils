@@ -72,7 +72,7 @@ class Validator
         # Start a timer to control validations
         timer = setTimeout(->
             expired = true
-        , @_timeout)
+        , @timeout)
 
         timeoutFunc = =>
             if expired
