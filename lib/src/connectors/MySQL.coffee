@@ -111,6 +111,8 @@ class MySQLConnector
     _selectDatabase: (databaseName, connection, callback) ->
         connection.query "USE #{databaseName}", [], callback
 
+    changeTable: (tableName) ->
+        @table = tableName
     # createMany
     # readMany
     # update
