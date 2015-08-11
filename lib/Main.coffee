@@ -10,6 +10,7 @@ module.exports.Translator = require './src/Translator'
 module.exports.Rules = require './src/Rules'
 module.exports.SystemInfo = require './src/SystemInfo'
 module.exports.XML = require './src/XML'
+module.exports.QueryBuilder = require './src/QueryBuilder'
 module.exports.Watcher = require './src/Watcher'
 module.exports.Connectors = {}
 module.exports.Connectors.Fs = require './src/connectors/Fs'
