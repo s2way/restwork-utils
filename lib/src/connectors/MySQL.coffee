@@ -1,9 +1,5 @@
 'use strict'
 
-# TIU DÛ:
-  # - Exportar QueryBuilder
-  # - Esta classe deve ser static (instancia apenas uma vez)
-
 class MySQLConnector
 
     @HOST: 'host'
@@ -15,7 +11,14 @@ class MySQLConnector
     @TABLE: 'resource'
     @DEFAULT_TIMEOUT: 10000
 
+    instance = null
+
     constructor: (params, container) ->
+        return instance if instance?
+        @init params, container
+        instance = @
+
+    init: (params, container) ->
 
         @rules = container?.Rules || require('./../../Main').Rules
         @Exceptions = container?.Exceptions || require('./../../Main').Exceptions
