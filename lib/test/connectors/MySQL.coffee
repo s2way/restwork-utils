@@ -1,3 +1,5 @@
+
+
 'use strict'
 
 expect = require 'expect.js'
@@ -10,7 +12,7 @@ describe 'the MySQLConnector,', ->
     connector = null
 
     beforeEach ->
-        delete require.cache[MySQLConnector]
+        delete require.cache[require.resolve('../../src/connectors/MySQL')]
         MySQLConnector = require '../../src/connectors/MySQL'
         params =
             host : 'host'
@@ -23,30 +25,61 @@ describe 'the MySQLConnector,', ->
 
     describe 'when creating a new instance', ->
 
-        beforeEach ->
-            params = null
-
         it 'should throw an exception if one or more params was not passed', ->
 
             expect(->
-                new MySQLConnector {}
+                instance = new MySQLConnector {}
+                instance.init {}
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
                 expect(e.message).to.be.ok()
             )
 
-        it 'should throw an exception if host is not useful', ->
+        it 'should throw an exception if host is empty object', ->
             expect(->
-                params =
-                    host: {}
-                    poolSize: 1
-                    timeout: 12
-                    user: 'test'
-                    password: 'test'
-                    domain: 'test'
-                    resource: 'test'
-                (new MySQLConnector(params)).init()
+                params.host = {}
+                instance = new MySQLConnector
+            ).to.throwError((e) ->
+                expect(e.type).to.be 'Fatal'
+                expect(e.name).to.be 'Invalid argument'
+                expect(e.message).to.be.ok()
+            )
+
+        it 'should throw an exception if host is null', ->
+            expect(->
+                params.host = null
+                instance = new MySQLConnector
+            ).to.throwError((e) ->
+                expect(e.type).to.be 'Fatal'
+                expect(e.name).to.be 'Invalid argument'
+                expect(e.message).to.be.ok()
+            )
+
+        it 'should throw an exception if host is undefined', ->
+            expect(->
+                params.host = undefined
+                instance = new MySQLConnector
+            ).to.throwError((e) ->
+                expect(e.type).to.be 'Fatal'
+                expect(e.name).to.be 'Invalid argument'
+                expect(e.message).to.be.ok()
+            )
+
+        it 'should throw an exception if host is zero', ->
+            expect(->
+                params.host = 0
+                instance = new MySQLConnector
+            ).to.throwError((e) ->
+                expect(e.type).to.be 'Fatal'
+                expect(e.name).to.be 'Invalid argument'
+                expect(e.message).to.be.ok()
+            )
+
+        it 'should throw an exception if host is empty string', ->
+            expect(->
+                params.host = ''
+                instance = new MySQLConnector
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
@@ -55,15 +88,8 @@ describe 'the MySQLConnector,', ->
 
         it 'should throw an exception if domain is not useful', ->
             expect(->
-                params =
-                    host: 'test'
-                    poolSize: 1
-                    timeout: 12
-                    user: 'test'
-                    password: 'test'
-                    domain: {}
-                    resource: 'test'
-                new MySQLConnector params
+                params.domain = {}
+                instance = new MySQLConnector
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
@@ -72,15 +98,8 @@ describe 'the MySQLConnector,', ->
 
         it 'should throw an exception if resource is not useful', ->
             expect(->
-                params =
-                    host: 'test'
-                    poolSize: 1
-                    timeout: 12
-                    user: 'test'
-                    password: 'test'
-                    domain: 'test'
-                    resource: {}
-                new MySQLConnector params
+                params.resource = {}
+                instance = new MySQLConnector
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
@@ -89,15 +108,8 @@ describe 'the MySQLConnector,', ->
 
         it 'should throw an exception if user is not useful', ->
             expect(->
-                params =
-                    host: 'test'
-                    poolSize: 1
-                    timeout: 12
-                    user: {}
-                    password: 'test'
-                    domain: 'test'
-                    resource: 'test'
-                new MySQLConnector params
+                params.user = {}
+                instance = new MySQLConnector
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
@@ -106,15 +118,8 @@ describe 'the MySQLConnector,', ->
 
         it 'should throw an exception if poolSize is not useful', ->
             expect(->
-                params =
-                    host: 'test'
-                    poolSize: {}
-                    timeout: 12
-                    user: 'test'
-                    password: 'test'
-                    domain: 'test'
-                    resource: 'test'
-                new MySQLConnector params
+                params.poolSize = {}
+                instance = new MySQLConnector
             ).to.throwError((e) ->
                 expect(e.type).to.be 'Fatal'
                 expect(e.name).to.be 'Invalid argument'
@@ -149,12 +154,13 @@ describe 'the MySQLConnector,', ->
                         expect(params).to.eql expectedParams
                         createPoolCalled = true
 
-            connector = new MySQLConnector params, deps
-            expect(connector).to.be.ok()
-            expect(connector.pool).to.be.ok()
+            instance = new MySQLConnector params, deps
+
+            expect(instance).to.be.ok()
+            expect(instance.pool).to.be.ok()
             expect(createPoolCalled).to.be.ok()
 
-    describe 'when reading an order', ->
+    describe 'when reading a specific order', ->
 
         it 'should return an error if the order id is null', (done) ->
 
@@ -186,52 +192,16 @@ describe 'the MySQLConnector,', ->
                 expect(response).not.to.be.ok()
                 done()
 
-        # deverá retornar erro ao pegar uma nova conexão do pool de conexões
-        it 'should return an error if the connection was unsuccessful', (done) ->
+        it 'should return an error if the executing query went wrong', (done) ->
 
-            expectedError = 'Error getConnection'
+            expectedError = 'Internal Error'
 
-            deps =
-                mysql:
-                    createPool: (params) ->
-                        getConnection: (callback) ->
-                            callback 'Error to get connection'
-
-            connector = new MySQLConnector params, deps
-            connector.init params, deps
-            connector._execute 'SELECT * FROM sky', [], (error, response) ->
+            instance = new MySQLConnector params
+            instance._execute = (query, params, callback) ->
+                callback expectedError
+            instance.readById 1, (error, response) ->
                 expect(error).to.eql expectedError
                 expect(response).not.to.be.ok()
-                done()
-
-        it 'should return the query error if it happens', (done) ->
-
-            releaseMethodCalled = no
-
-            expectedError = 'Error Query'
-
-            mockedConnection =
-                query: (query, params, callback) ->
-                    callback expectedError
-                release: ->
-                    releaseMethodCalled = yes
-
-            deps =
-                mysql:
-                    createPool: (params) ->
-                        getConnection: (callback) ->
-                            callback null, mockedConnection
-
-            connector = new MySQLConnector
-            connector.init params, deps
-
-            connector._selectDatabase = (databaseName, connection, callback)->
-                callback()
-
-            connector.readById 1, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                expect(releaseMethodCalled).to.be yes
                 done()
 
         it 'should return the found row', (done) ->
@@ -240,81 +210,415 @@ describe 'the MySQLConnector,', ->
                 reference: 1
                 amount: 100
 
-            mockedConnection =
-                query: (query, params, callback) ->
-                    callback null, expectedRow
-                release: ->
-
-            deps =
-                mysql:
-                    createPool: (params) ->
-                        getConnection: (callback) ->
-                            callback null, mockedConnection
-
-            connector = new MySQLConnector
-            connector.init params, deps
-            connector.readById 1, (error, response) ->
+            instance = new MySQLConnector params
+            instance._execute = (query, params, callback) ->
+                callback null, expectedRow
+            instance.readById 1, (error, response) ->
                 expect(error).not.to.be.ok()
                 expect(response).to.eql expectedRow
                 done()
 
         it 'should return a NOT_FOUND error if nothing was found', (done) ->
 
-            expectedRow =
-                reference: 1
-                amount: 100
+            expectedError =
+                name: 'Not found'
+                message: ''
+                type: 'Error'
 
-            mockedConnection =
-                query: (query, params, callback) ->
-                    callback()
-                release: ->
-
-            deps =
-                mysql:
-                    createPool: (params) ->
-                        getConnection: (callback) ->
-                            callback null, mockedConnection
-
-            connector = new MySQLConnector
-            connector.init params, deps
-            connector.readById 1, (error, response) ->
-                expect(error).not.to.be 'NOT FOUND'
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'should return an error if the database selection went wrong', (done) ->
-
-            expectedError = 'Error select database'
-
-            mockedConnection =
-                query: (query, params, callback) ->
-                    callback()
-                release: ->
-
-            deps =
-                mysql:
-                    createPool: (params) ->
-                        getConnection: (callback) ->
-                            callback null, mockedConnection
-
-            connector = new MySQLConnector params, deps
-
-            connector._selectDatabase = (databaseName, connection, callback)->
-                callback expectedError
-
-            connector.readById 1, (error, response) ->
+            instance = new MySQLConnector params
+            instance._execute = (query, params, callback) ->
+                callback()
+            instance.readById 1, (error, response) ->
                 expect(error).to.eql expectedError
                 expect(response).not.to.be.ok()
                 done()
 
-     describe 'when reading a order with join', ->
+    describe 'when reading an order', ->
+
+        it 'should hand the mysql error to the callback', (done) ->
+
+            expectedError = 'Value too large for defined data type'
+
+            instance = new MySQLConnector params
+            instance._execute = (query, params, callback)->
+                callback expectedError
+
+            instance.read 'SELECT size FROM yo_mama', (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return the order found', (done) ->
+
+            expectedOrder =
+                this: 'is'
+                your: 'order'
+
+            instance = new MySQLConnector params
+            instance._execute = (query, params, callback)->
+                callback null, expectedOrder
+
+            instance.read 'SELECT weight_reduction FROM yo_mama', (error, response) ->
+                expect(error).not.to.be.ok()
+                expect(response).to.eql expectedOrder
+                done()
+
+        it 'should return a NOT FOUND error if nothing was found (obviously)', (done) ->
+
+            instance = new MySQLConnector params
+            instance._execute = (query, params, callback)->
+                callback()
+
+            instance.read 'SELECT weight_reduction FROM yo_mama', (error, response) ->
+                expect(error).not.to.be.ok()
+                expect(response).not.to.be.ok()
+                done()
+
+    describe 'when creating an order', ->
+
+        it 'should return an error if the order data is null', (done) ->
+
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.create null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return an error if the order data is undefined', (done) ->
+
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.create undefined, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return an error if the order data is Empty object', (done) ->
+
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.create {}, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return the query error if it happens', (done) ->
+
+            expectedError = 'Error Query'
+
+            data =
+                id:1
+
+            connector = new MySQLConnector params
+
+            connector._execute = (query, params, callback)->
+                callback expectedError
+
+            connector.create data, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return the found rows affected', (done) ->
+
+            data =
+               id : 101
+               reference: 321321
+               issuer: 'visa'
+               auth_token: 'token1'
+               description: 'Teste recarga'
+               return_url: 'www.google.com'
+               amount : 201
+               payment_type: 'credito_a_vista'
+               installments: 1
+               tid: '231345644'
+
+            connector = new MySQLConnector params
+
+            connector._execute = (query, params, callback)->
+                callback()
+
+            connector.create data, (error, response) ->
+                expect(error).not.to.be.ok()
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should pass the expected Query and Params', (done) ->
+
+            expectedQuery = 'INSERT INTO tableName SET '
+            expectedQuery += 'id=?,reference=?,issuer=?,auth_token=?,description=?,return_url=?,amount=?,payment_type=?,installments=?,tid=?'
+
+            expectedParams = [
+                101,
+                321321,
+                'visa',
+                'token1',
+                'Teste recarga',
+                'www.google.com',
+                201,
+                'credito_a_vista',
+                1,
+                '231345644'
+            ]
+
+            data =
+                id: 101
+                reference: 321321
+                issuer: 'visa'
+                auth_token: 'token1'
+                description: 'Teste recarga'
+                return_url: 'www.google.com'
+                amount: 201
+                payment_type: 'credito_a_vista'
+                installments: 1
+                tid: '231345644'
+
+            connector = new MySQLConnector params
+
+            connector._execute = (query, params, callback)->
+                expect(query).to.eql expectedQuery
+                expect(params).to.eql expectedParams
+                done()
+
+            connector.create data, ->
+
+    describe 'when updating an order', ->
+
+        it 'deve receber um erro se o id for undefined', (done) ->
+            expectedError = 'Invalid id'
+
+            connector = new MySQLConnector params
+            connector.update undefined, null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o id for null', (done) ->
+            expectedError = 'Invalid id'
+
+            connector = new MySQLConnector params
+            connector.update null, null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o id for zero', (done) ->
+            expectedError = 'Invalid id'
+
+            connector = new MySQLConnector params
+            connector.update 0, null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o data for undefined', (done) ->
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.update '1', undefined, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o data for null', (done) ->
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.update '1', null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o data for vazio', (done) ->
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.update '1', {}, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se acontecer algum erro ao efetuar um update', (done) ->
+            expectedError = 'Error Query'
+
+            data =
+                id:1
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback)->
+                callback expectedError
+
+            connector.update 1,data, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve retornar sucesso se não ocorreu nenhum erro', (done) ->
+
+            data =
+               issuer: "visa"
+               payment_type: "credito_a_vista"
+               installments: 1
+
+            connector = new MySQLConnector params
+
+            expectedRow =
+                affected_rows: 1
+
+            connector._execute = (query, params, callback)->
+                callback null, expectedRow
+
+            connector.update '123', data, (err, row) ->
+                expect(err).not.to.be.ok()
+                expect(row).to.be.eql expectedRow
+                done()
+
+        it 'should pass the expected Query and Params', (done) ->
+
+            id = '12345678901234567890'
+
+            data =
+               issuer: "visa"
+               payment_type: "credito_a_vista"
+               installments: 1
+
+            expectedQuery = 'UPDATE tableName SET issuer=?,payment_type=?,installments=? WHERE id=?'
+
+            expectedParams = [
+                data.issuer,
+                data.payment_type,
+                data.installments,
+                id
+            ]
+
+            connector = new MySQLConnector params
+
+            connector._execute = (query, params, callback)->
+                expect(query).to.eql expectedQuery
+                expect(params).to.eql expectedParams
+                done()
+
+            connector.update id, data, ->
+
+    describe 'when executing a query', ->
+
+        it 'should return an error if was a get connection problem', (done) ->
+
+            expectedError = 'Error getConnection'
+
+            deps =
+                mysql:
+                    createPool: (params) ->
+                        getConnection: (callback) ->
+                            callback ''
+
+            instance = new MySQLConnector params, deps
+            instance._execute '', [], (error, response)->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return an error if was a selecting database', (done) ->
+
+            expectedError = 'Error select database'
+
+            mockedConnection =
+                release: ->
+
+            deps =
+                mysql:
+                    createPool: (params) ->
+                        getConnection: (callback) ->
+                            callback null, mockedConnection
+            instance = new MySQLConnector params, deps
+            instance._selectDatabase = (databaseName, connection, callback) ->
+                callback expectedError
+            instance._execute '', [], (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return an error after selecting database', (done) ->
+
+            expectedError = 'Internal Error'
+
+            mockedConnection =
+                query: (query, params, callback) ->
+                    callback expectedError
+                release: ->
+
+            deps =
+                mysql:
+                    createPool: (params) ->
+                        getConnection: (callback) ->
+                            callback null, mockedConnection
+            instance = new MySQLConnector params, deps
+            instance._selectDatabase = (databaseName, connection, callback) ->
+                callback()
+            instance._execute '', [], (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return a expected result if everything was ok', (done) ->
+
+            expectedResponse =
+                affected_rows: 1
+
+            mockedConnection =
+                query: (query, params, callback) ->
+                    callback null, expectedResponse
+                release: ->
+
+            deps =
+                mysql:
+                    createPool: (params) ->
+                        getConnection: (callback) ->
+                            callback null, mockedConnection
+            instance = new MySQLConnector params, deps
+            instance._selectDatabase = (databaseName, connection, callback) ->
+                callback()
+            instance._execute '', [], (error, response) ->
+                expect(error).not.to.be.ok()
+                expect(response).to.eql expectedResponse
+                done()
+
+    describe 'when selecting a database', ->
+
+        it 'should pass the expected Query', (done) ->
+
+            databaseName = 's2Pay'
+
+            expectedQuery = "USE #{databaseName}"
+
+            mockedConnection =
+                query: (query, values, callback) ->
+                    expect(query).to.eql expectedQuery
+                    expect(values).to.eql []
+                    done()
+
+            instance = new MySQLConnector params
+            instance._selectDatabase databaseName, mockedConnection, ->
+
+    describe 'when changing a tableName', ->
+
+        it 'deve validar se o nome da tabela foi alterada corretamente', ->
+            connector = new MySQLConnector params
+            connector.changeTable 'secondTableName'
+            expect(connector.table).to.eql 'secondTableName'
+
+    describe 'when reading a order with join', ->
 
         mysqlParams = null
         joinParams = null
 
         beforeEach ->
             mysqlParams =
-                host : 'host'
+                host: 'host'
                 poolSize : 1
                 timeout : 10000
                 user: 'user'
@@ -426,322 +730,3 @@ describe 'the MySQLConnector,', ->
                 expect(params).to.eql expectedParams
                 done()
             connector.readJoin '123456789', joinParams, ->
-
-    describe 'when creating an order', ->
-
-        it 'should return an error if the order data is null', (done) ->
-
-            expectedError = 'Invalid data'
-
-            connector = new MySQLConnector params
-            connector.create null, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'should return an error if the order data is undefined', (done) ->
-
-            expectedError = 'Invalid data'
-
-            connector = new MySQLConnector params
-            connector.create undefined, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'should return an error if the order data is Empty object', (done) ->
-
-            expectedError = 'Invalid data'
-
-            connector = new MySQLConnector params
-            connector.create {}, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'should return the query error if it happens', (done) ->
-
-            expectedError = 'Error Query'
-
-            data =
-                id:1
-
-            connector = new MySQLConnector params
-
-            connector._execute = (query, params, callback)->
-                callback expectedError
-
-            connector.create data, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'should return the found rows affected', (done) ->
-
-            data =
-               id : 101
-               reference: 321321
-               seq_code_status: 1
-               description: "Teste recarga"
-               return_url: "www.google.com"
-               amount : 201
-               payment_type: "credito_a_vista"
-               installments: 1
-
-            connector = new MySQLConnector params
-
-            connector._execute = (query, params, callback)->
-                callback null, data
-
-            connector.create data, (error, response) ->
-                expect(error).not.to.be.ok()
-                expect(response).not.to.be.ok()
-                done()
-
-        # it 'should pass the expected Query and Params', (done) ->
-
-        #     expectedQuery = 'INSERT INTO tableName SET id=?'
-        #     expectedQuery += ',reference=?,seq_code_status=?,description=?,return_url=?'
-        #     expectedQuery += ',amount=?,payment_type=?,installments=?'
-            
-        #     expectedParams = [
-        #         101,
-        #         321321,
-        #         1,
-        #         "Teste recarga",
-        #         "www.google.com",
-        #         201,
-        #         "credito_a_vista",
-        #         1
-        #     ]
-
-        #     data =
-        #        id : 101
-        #        reference: 321321
-        #        seq_code_status: 1
-        #        description: "Teste recarga"
-        #        return_url: "www.google.com"
-        #        amount : 201
-        #        payment_type: "credito_a_vista"
-        #        installments: 1
-
-        #     connector = new MySQLConnector params
-
-        #     connector._execute = (query, params, callback)->
-        #         expect(query).to.eql expectedQuery
-        #         expect(params).to.eql expectedParams
-        #         done()
-
-        #     connector.create data, ->
-
-    describe 'when reading an order', ->
-
-        it 'should hand the mysql error to the callback', (done) ->
-
-            expectedError = 'Value too large for defined data type'
-
-            mockedConnection =
-                query: (query, params, callback) ->
-                    callback expectedError
-                release: ->
-
-            deps =
-                mysql:
-                    createPool: (params) ->
-                        getConnection: (callback) ->
-                            callback null, mockedConnection
-
-            connector = new MySQLConnector
-            console.log connector._execute.toString()
-            connector.init params, deps
-            connector._selectDatabase = (databaseName, connection, callback)->
-                callback null, mockedConnection
-
-            connector.read 'SELECT size FROM yo_mama', (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'should return a NOT FOUND error if nothing was found (obviously)', (done) ->
-
-            mockedConnection =
-                query: (query, params, callback) ->
-                    callback()
-                release: ->
-
-            deps =
-                mysql:
-                    createPool: (params) ->
-                        getConnection: (callback) ->
-                            callback null, mockedConnection
-
-            connector = new MySQLConnector params, deps
-            connector._selectDatabase = (databaseName, connection, callback)->
-                callback null, mockedConnection
-
-            connector.read 'SELECT weight_reduction FROM yo_mama', (error, response) ->
-                expect(error).not.to.be.ok()
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'should return the order found', (done) ->
-
-            expectedOrder =
-                this: 'is'
-                your: 'order'
-
-            mockedConnection =
-                query: (query, params, callback) ->
-                    callback null, expectedOrder
-                release: ->
-
-            deps =
-                mysql:
-                    createPool: (params) ->
-                        getConnection: (callback) ->
-                            callback null, mockedConnection
-
-            connector = new MySQLConnector params, deps
-            connector._selectDatabase = (databaseName, connection, callback)->
-                callback null, mockedConnection
-
-            connector.read 'SELECT weight_reduction FROM yo_mama', (error, response) ->
-                expect(error).not.to.be.ok()
-                expect(response).to.eql expectedOrder
-                done()
-
-    describe 'when updating an order', ->
-
-        it 'deve receber um erro se o id for undefined', (done) ->
-            expectedError = 'Invalid id'
-
-            connector = new MySQLConnector params
-            connector.update undefined, null, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'deve receber um erro se o id for null', (done) ->
-            expectedError = 'Invalid id'
-
-            connector = new MySQLConnector params
-            connector.update null, null, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'deve receber um erro se o id for zero', (done) ->
-            expectedError = 'Invalid id'
-
-            connector = new MySQLConnector params
-            connector.update 0, null, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'deve receber um erro se o data for undefined', (done) ->
-            expectedError = 'Invalid data'
-
-            connector = new MySQLConnector params
-            connector.update '1', undefined, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'deve receber um erro se o data for null', (done) ->
-            expectedError = 'Invalid data'
-
-            connector = new MySQLConnector params
-            connector.update '1', null, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'deve receber um erro se o data for vazio', (done) ->
-            expectedError = 'Invalid data'
-
-            connector = new MySQLConnector params
-            connector.update '1', {}, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-        
-        it 'deve receber um erro se acontecer algum erro ao efetuar um update', (done) ->
-            expectedError = 'Error Query'
-
-            data =
-                id:1
-
-            connector = new MySQLConnector params
-
-            connector._execute = (query, params, callback)->
-                callback expectedError
-
-            connector.update 1,data, (error, response) ->
-                expect(error).to.eql expectedError
-                expect(response).not.to.be.ok()
-                done()
-
-        it 'should pass the expected Query and Params', (done) ->
-
-            id = '12345678901234567890'
-
-            data =
-               issuer: "visa"
-               payment_type: "credito_a_vista"
-               installments: 1
-
-            expectedQuery = 'UPDATE tableName SET issuer=?,payment_type=?,installments=? WHERE id=?'
-
-            expectedParams = [
-                data.issuer,
-                data.payment_type,
-                data.installments,
-                id
-            ]
-
-            connector = new MySQLConnector params
-
-            connector._execute = (query, params, callback)->
-                expect(query).to.eql expectedQuery
-                expect(params).to.eql expectedParams
-                done()
-
-            connector.update id, data, ->
-
-        it 'deve retornar sucesso se não ocorreu nenhum erro', (done) ->
-
-            data =
-               issuer: "visa"
-               payment_type: "credito_a_vista"
-               installments: 1
-
-            connector = new MySQLConnector params
-
-            expectedRow =
-                affected_rows: 1
-
-            connector._execute = (query, params, callback)->
-                callback null, expectedRow
-
-            connector.update '123', data, (err, row) ->
-                expect(err).not.to.be.ok()
-                expect(row).to.be.eql expectedRow
-                done()
-
-    describe 'when changing a tableName', ->
-
-        it 'deve validar se o nome da tabela foi alterada corretamente', ->
-
-            params=
-                host : 'host'
-                poolSize : 1
-                timeout : 10000
-                user: 'user'
-                password: 'password'
-                domain: 'databaseName'
-                resource: 'firstTableName'
-
-            connector = new MySQLConnector params
-            connector.changeTable 'secondTableName'
-            expect(connector.table).to.eql 'secondTableName'
