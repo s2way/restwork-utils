@@ -508,7 +508,7 @@ describe 'the MySQLConnector,', ->
 
         it 'should return an error if was a get connection problem', (done) ->
 
-            expectedError = 'Error getConnection'
+            expectedError = 'Database connection failed'
 
             deps =
                 mysql:
@@ -524,7 +524,7 @@ describe 'the MySQLConnector,', ->
 
         it 'should return an error if was a selecting database', (done) ->
 
-            expectedError = 'Error select database'
+            expectedError = 'Error selecting database'
 
             mockedConnection =
                 release: ->
