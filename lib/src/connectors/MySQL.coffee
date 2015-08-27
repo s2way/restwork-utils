@@ -53,7 +53,6 @@ class MySQLConnector
         @pool = @mysql.createPool poolParams
 
     readById: (id, callback) ->
-        console.log id
         return callback 'Invalid id' if !@rules.isUseful(id) or @rules.isZero id
         @_execute "SELECT * FROM #{@table} WHERE id = ?", [id], (err, row) =>
             return callback err if err?
