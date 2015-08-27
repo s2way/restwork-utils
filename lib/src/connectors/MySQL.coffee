@@ -144,7 +144,7 @@ class MySQLConnector
         @_execute query, [id], (err, row) =>
             return callback err if err?
             return callback null, row if @rules.isUseful(row)
-            return callback NOT_FOUND_ERROR
+            return callback 'NOT_FOUND'
 
     # createMany
     # readMany
