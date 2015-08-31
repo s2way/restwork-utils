@@ -50,7 +50,6 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
-    "better-require": "git://github.com/Moharu/better-require.git",
     "moment": "^2.10.3",
     "mysql": "^2.9.0",
     "node-uuid": "^1.4.3",

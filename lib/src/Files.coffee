@@ -9,9 +9,6 @@ path = require 'path'
 _ = require 'underscore'
 Exceptions = require './Exceptions'
 
-# Class overwrite
-require('better-require')()
-
 class Files
 
     # Defaults
