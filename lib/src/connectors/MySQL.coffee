@@ -10,7 +10,6 @@ class MySQLConnector
     @DATABASE: 'domain'
     @TABLE: 'resource'
     @DEFAULT_TIMEOUT: 10000
-    NOT_FOUND_ERROR = 'NOT_FOUND'
 
     instance = null
 
@@ -75,9 +74,9 @@ class MySQLConnector
             values.push value
         fields = fields.substr 0,fields.length-1
 
-        @_execute "INSERT INTO #{@table} SET #{fields}", values, (err) ->
+        @_execute "INSERT INTO #{@table} SET #{fields}", values, (err, row) ->
             return callback err if err?
-            return callback()
+            return callback null, row
 
     update:(id, data, callback) ->
         return callback 'Invalid id' if !@rules.isUseful(id) or @rules.isZero id
@@ -103,11 +102,11 @@ class MySQLConnector
 
     _execute: (query, params, callback) ->
         @pool.getConnection (err, connection) =>
-            return callback 'Error getConnection' if err?
+            return callback 'Database connection failed' if err?
             @_selectDatabase "#{@database}", connection, (err) ->
                 if err?
                     connection.release()
-                    return callback 'Error select database' if err?
+                    return callback 'Error selecting database' if err?
                 connection.query query, params, (err, row) ->
                     connection.release()
                     callback err, row
@@ -145,7 +144,7 @@ class MySQLConnector
         @_execute query, [id], (err, row) =>
             return callback err if err?
             return callback null, row if @rules.isUseful(row)
-            return callback NOT_FOUND_ERROR
+            return callback 'NOT_FOUND'
 
     # createMany
     # readMany
