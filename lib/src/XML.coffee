@@ -27,4 +27,17 @@ class XML
             return
         json
 
+    # Hides all info in the tag, replacing them with *
+    # @param {string} tag The tag to hide
+    # @param {string} originalXml The XML to iterate
+    # @returns {string} XML with the hidden information
+    hideInfoFromTag: (tag, originalXml) ->
+        xml = originalXml.slice()
+        index1 = (xml.search "<#{tag}>") + tag.length + 2
+        index2 = xml.search "</#{tag}>"
+        whatToHide = xml.substring index1, index2
+        hidden = whatToHide.replace /./g, "*"
+        xml = xml.replace whatToHide, hidden
+        return xml
+
 module.exports = XML

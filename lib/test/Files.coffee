@@ -118,19 +118,6 @@ describe 'Files', ->
 
     describe 'file2JSON', ->
 
-        it 'should return a transformed file content into a json object', ->
-            expectedJSON =
-                test:
-                    sub1Test:
-                        sub2Test: '__test'
-            content = """
-test:
-  sub1Test:
-    sub2Test: __test
-"""
-            Files.createFileIfNotExists jsonToCreate, content
-            expect(JSON.stringify Files.file2JSON jsonToCreate).to.eql JSON.stringify expectedJSON
-
         it 'should throw an exception if the file is not in a valid format', ->
             content = """
 {{}
