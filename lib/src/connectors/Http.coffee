@@ -12,7 +12,7 @@ class HttpConnector
         if params?.type is 'json'
             client = @restify.createJsonClient url:params.url
         else
-            client = @restify.createStringClient url: params.url, agent: false
+            client = @restify.createStringClient url: params.url
 
         path = params?.path || ''
 
