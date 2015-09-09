@@ -32,4 +32,16 @@ class HttpConnector
             return callback err if err?
             callback null, data
 
+    put: (params, callback) ->
+        if params?.type is 'json'
+            client = @restify.createJsonClient url:params.url
+        else
+            client = @restify.createStringClient url: params.url
+
+        path = params?.path || ''
+
+        client.put path, params?.data, (err, req, res, data) ->
+            return callback err if err?
+            callback null, data
+
 module.exports = HttpConnector
