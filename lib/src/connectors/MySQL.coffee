@@ -117,8 +117,18 @@ class MySQLConnector
     changeTable: (tableName) ->
         @table = tableName
 
-    readJoin: (id, params, callback) ->
-        return callback 'Invalid id' if !@rules.isUseful(id) or @rules.isZero id
+    readJoin: (orderIdentifier, params, callback) ->
+        orderSearch = null
+        fieldSearch = null
+
+        if orderIdentifier?.data?.id?
+            orderSearch = orderIdentifier.data.id
+            fieldSearch = 'id'
+        else if orderIdentifier?.data?.reference?
+            orderSearch = orderIdentifier.data.reference
+            fieldSearch = 'reference'
+
+        return callback 'Invalid id' if !@rules.isUseful(orderIdentifier) or @rules.isZero orderIdentifier
 
         joinTable = params?.table || null
         condition = params?.condition || null
@@ -139,9 +149,9 @@ class MySQLConnector
 
         selectFields = selectFields.substring(0, selectFields.length-1)
 
-        query = "SELECT #{selectFields} FROM #{@table} JOIN #{joinTable} ON #{condition} WHERE #{@table}.id = ? #{orderBy} #{limit}"
+        query = "SELECT #{selectFields} FROM #{@table} JOIN #{joinTable} ON #{condition} WHERE #{@table}.#{fieldSearch} = ? #{orderBy} #{limit}"
 
-        @_execute query, [id], (err, row) =>
+        @_execute query, [orderSearch], (err, row) =>
             return callback err if err?
             return callback null, row if @rules.isUseful(row)
             return callback 'NOT_FOUND'
