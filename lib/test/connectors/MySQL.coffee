@@ -723,10 +723,14 @@ describe 'the MySQLConnector,', ->
             joinParams.orderBy = 'orderField DESC'
             joinParams.limit = 15
 
+            inputMessage =
+                data:
+                    id: 123456789
 
             connector = new MySQLConnector mysqlParams
             connector._execute = (query, params, callback) ->
                 expect(query).to.eql expectedQuery
                 expect(params).to.eql expectedParams
                 done()
-            connector.readJoin '123456789', joinParams, ->
+
+            connector.readJoin inputMessage, joinParams, ->
