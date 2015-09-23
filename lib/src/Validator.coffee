@@ -10,7 +10,7 @@ Exceptions = require './Exceptions'
 class Validator
 
     # Defaults
-    @DEFAULT_TIMEOUT: 1000
+    @DEFAULT_TIMEOUT: 10000
 
     # Params
     @PARAMS_TIMEOUT: 'timeout'

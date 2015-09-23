@@ -16,3 +16,6 @@ module.exports.Connectors = {}
 module.exports.Connectors.Fs = require './src/connectors/Fs'
 module.exports.Connectors.Http = require './src/connectors/Http'
 module.exports.Connectors.MySQL = require './src/connectors/MySQL'
+
+module.exports.Connectors.CouchMuffin = require './src/connectors/CouchMuffin'
+module.exports.Connectors.Couchbase = require './src/connectors/Couchbase'
