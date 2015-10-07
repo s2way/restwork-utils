@@ -156,11 +156,23 @@ class MySQLConnector
             return callback null, row if @rules.isUseful(row)
             return callback 'NOT_FOUND'
 
+    delete: (data, callback) ->
+        return callback 'Invalid data' if !@rules.isUseful(data)
+        fields = ''
+        values = []
+        for key, value of data
+            fields += "#{key}=?,"
+            values.push value
+        fields = fields.substr 0,fields.length-1
+
+        @_execute "DELETE FROM #{@table} WHERE #{fields}", values, (err, row) ->
+            return callback err if err?
+            return callback null, row
+
     # createMany
     # readMany
     # update
     # updateMany
-    # delete
     # deleteMany
 
 

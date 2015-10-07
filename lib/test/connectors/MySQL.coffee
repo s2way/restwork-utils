@@ -386,6 +386,28 @@ describe 'the MySQLConnector,', ->
 
             connector.create data, ->
 
+    describe 'when deleting', ->
+
+        it 'should pass the expected Query and Params', (done) ->
+
+            expectedQuery = 'DELETE FROM tableName WHERE id=?'
+
+            expectedParams = [
+                101
+            ]
+
+            data =
+                id: 101
+
+            connector = new MySQLConnector params
+
+            connector._execute = (query, params, callback)->
+                expect(query).to.eql expectedQuery
+                expect(params).to.eql expectedParams
+                done()
+
+            connector.delete data, ->
+
     describe 'when updating an order', ->
 
         it 'deve receber um erro se o id for undefined', (done) ->
