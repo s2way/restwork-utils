@@ -1,4 +1,5 @@
 'use strict'
+_ = require 'underscore'
 
 class QueryBuilder
 
@@ -17,6 +18,20 @@ class QueryBuilder
                 else
                     commaList += fields[i]
         commaList
+
+    bulkInsert: (table, data, filterFields) ->
+        throw new @Exceptions.Error @Exceptions.ILLEGAL_ARGUMENT unless table? and data? and _.isArray(data)
+        # Define os campos e filtra os dados de acordo
+        fields = filterFields or _.keys(data[0])
+        filteredData = (_.pick(obj, fields) for obj in data) if filterFields
+        
+        @insertInto table
+        @query += "(#{fields})"
+        @query += " VALUES "
+        
+        escape = (value, escape) ->
+            escape value
+        @query += ("(#{_.map(_.values(obj), @escape).join()})" for obj in (filteredData or data))
 
     selectStarFrom: (table) ->
         throw new @Exceptions.Error @Exceptions.ILLEGAL_ARGUMENT if table is undefined

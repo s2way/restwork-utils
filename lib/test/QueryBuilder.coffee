@@ -8,6 +8,52 @@ describe 'QueryBuilder.js', ->
     beforeEach ->
         $ = new QueryBuilder()
 
+    describe 'bulkInsert', ->
+
+        it 'should throw an exception if table is not set', ->
+            try
+                $.bulkInsert(null, 'data')
+                expect.fail()
+            catch e
+                expect(e.name).to.be "Illegal argument"
+
+        it 'should throw an exception if data is not set', ->
+            try
+                $.bulkInsert('table', null)
+                expect.fail()
+            catch e
+                expect(e.name).to.be "Illegal argument"
+
+        it 'should output INSERT INTO sky (star,planet) VALUES (sun,earth) if the filer fields are set', ->
+            data = [
+                {
+                    star: 'sun'
+                    planet: 'earth'
+                    sattelite: 'moon'
+                }
+                {
+                    star: 'sun'
+                    planet: 'jupiter'
+                    sattelite: 'europa'
+                }
+            ]
+            expect($.bulkInsert('sky', data, ['star', 'planet'])).to.eql "INSERT INTO sky (star,planet) VALUES ('sun','earth'),('sun','jupiter')"
+
+        it 'should output INSERT INTO sky (star,planet,sattelite) VALUES (sun,earth,moon)... even if no fields are set', ->
+            data = [
+                {
+                    star: 'sun'
+                    planet: 'earth'
+                    sattelite: 'moon'
+                }
+                {
+                    star: 'sun'
+                    planet: 'jupiter'
+                    sattelite: 'europa'
+                }
+            ]
+            expect($.bulkInsert('sky', data)).to.eql "INSERT INTO sky (star,planet,sattelite) VALUES ('sun','earth','moon'),('sun','jupiter','europa')"
+
     describe 'selectStarFrom', ->
         it 'should output SELECT * FROM + table', ->
             expect("SELECT * FROM sky").to.be $.selectStarFrom("sky").build()

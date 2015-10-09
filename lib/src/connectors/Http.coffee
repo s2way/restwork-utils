@@ -2,6 +2,7 @@
 
 path = require 'path'
 uuid = require 'node-uuid'
+qs = require 'querystring'
 
 class HttpConnector
 
@@ -27,6 +28,8 @@ class HttpConnector
             client = @restify.createStringClient url:params.url
 
         path = params?.path || ''
+
+        path = "#{path}?#{qs.stringify(params.urlParams)}" if params?.urlParams?
 
         client.get path, (err, req, res, data) ->
             return callback err if err?

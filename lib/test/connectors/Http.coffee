@@ -5,6 +5,34 @@ expect = require 'expect.js'
 
 describe 'the HttpConnector,', ->
 
+    describe 'when the get method is called', (done) ->
+
+        it 'should build the url with params if they are set', ->
+
+            url = 'http://localhost:1234'
+            expectedUrl = "#{url}?key=value"
+            receivedUrl = null
+
+            class Restify
+                @createStringClient: (options)->
+                    receivedUrl = options.url
+                    mockPost =
+                        get: ->
+
+            deps =
+                restify: Restify
+
+            params =
+                path: url
+                urlParams:
+                    key: 'value'
+
+            instance = new HttpConnector deps
+            instance.get params, ->
+                expect(receivedUrl).to.eql expectedUrl
+                done()
+
+
     describe 'when the post method is called', (done) ->
 
         it 'should instantiate restify http client with the passed url', (done) ->
