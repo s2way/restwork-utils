@@ -78,6 +78,12 @@ class MySQLConnector
             return callback err if err?
             return callback null, row
 
+    bulkCreate: (query, callback) ->
+        @_execute query, [], (err, row) =>
+            return callback err if err?
+            return callback null, row if @rules.isUseful(row)
+            return callback()
+
     update:(id, data, callback) ->
         return callback 'Invalid id' if !@rules.isUseful(id) or @rules.isZero id
         return callback 'Invalid data' if !@rules.isUseful(data)

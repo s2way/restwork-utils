@@ -54,6 +54,36 @@ describe 'QueryBuilder.js', ->
             ]
             expect($.bulkInsert('sky', data)).to.eql "INSERT INTO sky (star,planet,sattelite) VALUES ('sun','earth','moon'),('sun','jupiter','europa')"
 
+        it 'should output INSERT INTO sky (planet) VALUES (earth)... with the excluding fields option', ->
+            data = [
+                {
+                    star: 'sun'
+                    planet: 'earth'
+                    sattelite: 'moon'
+                }
+                {
+                    star: 'sun'
+                    planet: 'jupiter'
+                    sattelite: 'europa'
+                }
+            ]
+            expect($.bulkInsert('sky', data, null, ['sattelite', 'star'])).to.eql "INSERT INTO sky (planet) VALUES ('earth'),('jupiter')"
+
+        it 'should output INSERT INTO sky (star,planet) VALUES (sun,earth)... with all options (just in case)', ->
+            data = [
+                {
+                    star: 'sun'
+                    planet: 'earth'
+                    sattelite: 'moon'
+                }
+                {
+                    star: 'sun'
+                    planet: 'jupiter'
+                    sattelite: 'europa'
+                }
+            ]
+            expect($.bulkInsert('sky', data, ['planet', 'sattelite'], ['sattelite', 'non-existant'])).to.eql "INSERT INTO sky (planet) VALUES ('earth'),('jupiter')"
+
     describe 'selectStarFrom', ->
         it 'should output SELECT * FROM + table', ->
             expect("SELECT * FROM sky").to.be $.selectStarFrom("sky").build()

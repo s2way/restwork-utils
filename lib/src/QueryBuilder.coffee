@@ -19,12 +19,13 @@ class QueryBuilder
                     commaList += fields[i]
         commaList
 
-    bulkInsert: (table, data, filterFields) ->
+    bulkInsert: (table, data, filterFields, excludeFields) ->
         throw new @Exceptions.Error @Exceptions.ILLEGAL_ARGUMENT unless table? and data? and _.isArray(data)
-        # Define os campos e filtra os dados de acordo
-        fields = filterFields or _.keys(data[0])
-        filteredData = (_.pick(obj, fields) for obj in data) if filterFields
-        
+        # Define quais serão os campos
+        fields = _.difference (filterFields or _.keys(data[0])), excludeFields
+        # Filtra os dados, se necessário
+        filteredData = (_.pick(obj, fields) for obj in data) if filterFields or excludeFields
+
         @insertInto table
         @query += "(#{fields})"
         @query += " VALUES "
@@ -32,6 +33,7 @@ class QueryBuilder
         escape = (value, escape) ->
             escape value
         @query += ("(#{_.map(_.values(obj), @escape).join()})" for obj in (filteredData or data))
+        @
 
     selectStarFrom: (table) ->
         throw new @Exceptions.Error @Exceptions.ILLEGAL_ARGUMENT if table is undefined
