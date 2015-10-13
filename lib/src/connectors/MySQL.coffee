@@ -39,7 +39,6 @@ class MySQLConnector
         @_checkArg user, MySQLConnector.USER
         @_checkArg poolSize, MySQLConnector.POOL_SIZE
         @_checkArg @database, MySQLConnector.DATABASE
-        @_checkArg @table, MySQLConnector.TABLE
 
         poolParams =
             host: host
