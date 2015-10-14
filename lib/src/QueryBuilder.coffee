@@ -33,7 +33,7 @@ class QueryBuilder
         escape = (value, escape) ->
             escape value
         @query += ("(#{_.map(_.values(obj), @escape).join()})" for obj in (filteredData or data))
-        @
+        this
 
     selectStarFrom: (table) ->
         throw new @Exceptions.Error @Exceptions.ILLEGAL_ARGUMENT if table is undefined

@@ -4,6 +4,7 @@ QueryBuilder = require '../src/QueryBuilder'
 expect = require 'expect.js'
 
 describe 'QueryBuilder.js', ->
+
     $ = null
     beforeEach ->
         $ = new QueryBuilder()
@@ -37,7 +38,7 @@ describe 'QueryBuilder.js', ->
                     sattelite: 'europa'
                 }
             ]
-            expect($.bulkInsert('sky', data, ['star', 'planet'])).to.eql "INSERT INTO sky (star,planet) VALUES ('sun','earth'),('sun','jupiter')"
+            expect($.bulkInsert('sky', data, ['star', 'planet']).build()).to.eql "INSERT INTO sky (star,planet) VALUES ('sun','earth'),('sun','jupiter')"
 
         it 'should output INSERT INTO sky (star,planet,sattelite) VALUES (sun,earth,moon)... even if no fields are set', ->
             data = [
@@ -52,7 +53,7 @@ describe 'QueryBuilder.js', ->
                     sattelite: 'europa'
                 }
             ]
-            expect($.bulkInsert('sky', data)).to.eql "INSERT INTO sky (star,planet,sattelite) VALUES ('sun','earth','moon'),('sun','jupiter','europa')"
+            expect($.bulkInsert('sky', data).build()).to.eql "INSERT INTO sky (star,planet,sattelite) VALUES ('sun','earth','moon'),('sun','jupiter','europa')"
 
         it 'should output INSERT INTO sky (planet) VALUES (earth)... with the excluding fields option', ->
             data = [
@@ -67,7 +68,7 @@ describe 'QueryBuilder.js', ->
                     sattelite: 'europa'
                 }
             ]
-            expect($.bulkInsert('sky', data, null, ['sattelite', 'star'])).to.eql "INSERT INTO sky (planet) VALUES ('earth'),('jupiter')"
+            expect($.bulkInsert('sky', data, null, ['sattelite', 'star']).build()).to.eql "INSERT INTO sky (planet) VALUES ('earth'),('jupiter')"
 
         it 'should output INSERT INTO sky (star,planet) VALUES (sun,earth)... with all options (just in case)', ->
             data = [
@@ -82,9 +83,10 @@ describe 'QueryBuilder.js', ->
                     sattelite: 'europa'
                 }
             ]
-            expect($.bulkInsert('sky', data, ['planet', 'sattelite'], ['sattelite', 'non-existant'])).to.eql "INSERT INTO sky (planet) VALUES ('earth'),('jupiter')"
+            expect($.bulkInsert('sky', data, ['planet', 'sattelite'], ['sattelite', 'non-existant']).build()).to.eql "INSERT INTO sky (planet) VALUES ('earth'),('jupiter')"
 
     describe 'selectStarFrom', ->
+
         it 'should output SELECT * FROM + table', ->
             expect("SELECT * FROM sky").to.be $.selectStarFrom("sky").build()
 
@@ -96,6 +98,7 @@ describe 'QueryBuilder.js', ->
                 expect(e.name).to.be "Illegal argument"
 
     describe 'selectCountStarFrom', ->
+
         it 'should output SELECT COUNT(*) AS count FROM + table', ->
             expect("SELECT COUNT(*) AS count FROM sky").to.be $.selectCountStarFrom("sky").build()
 
@@ -107,6 +110,7 @@ describe 'QueryBuilder.js', ->
             )
 
     describe 'select', ->
+
         it 'should output SELECT + the parameters if they are passed', ->
             expect("SELECT c1, c2, c3").to.be $.select("c1", "c2", "c3").build()
 
@@ -118,6 +122,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'from', ->
+
         it 'should output FROM + table if the parameter is passed', ->
             expect("FROM sky").to.be $.from("sky").build()
 
@@ -129,6 +134,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'deleteFrom', ->
+
         it 'should output DELETE FROM + table if the parameter is passed', ->
             expect("DELETE FROM sky").to.be $.deleteFrom("sky").build()
 
@@ -140,6 +146,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'where', ->
+
         it 'should output a WHERE + conditions separated by ANDs if multiple parameters are passed', ->
             expect("WHERE a > 10 AND b < 10").to.be $.where("a > 10", "b < 10").build()
 
@@ -147,6 +154,7 @@ describe 'QueryBuilder.js', ->
             expect("WHERE a > 10 AND b < 10").to.be $.where(["a > 10", "b < 10"]).build()
 
     describe 'join', ->
+
         it 'should output a JOIN + table name', ->
             expect("JOIN sky").to.be $.join("sky").build()
 
@@ -158,6 +166,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'innerJoin', ->
+
         it 'should output an INNER JOIN + table name', ->
             expect("INNER JOIN sky").to.be $.innerJoin("sky").build()
 
@@ -169,6 +178,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'on', ->
+
         it 'should output an ON + conditions', ->
             expect("ON a = b AND c = d").to.be $.on("a = b", "c = d").build()
 
@@ -180,6 +190,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'update', ->
+
         it 'should output an UPDATE + table name', ->
             expect("UPDATE sky").to.be $.update("sky").build()
 
@@ -191,6 +202,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'set', ->
+
         it 'should output a SET + fields and values', ->
             expect("SET one = 1, two = 2, three = 'three'").to.be $.set(
                 one: $.value(1)
@@ -206,6 +218,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'insertInto', ->
+
         it 'should output an INSERT INTO + table name', ->
             expect("INSERT INTO sky").to.be $.insertInto("sky").build()
 
@@ -217,6 +230,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'orderBy', ->
+
         it 'should output an order by expression', ->
             expect("ORDER BY id DESC").to.be $.orderBy("id", "DESC").build()
 
@@ -228,6 +242,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'groupBy', ->
+
         it 'should output GROUP BY + fields if they are passed', ->
             expect("GROUP BY c1, c2, c3").to.be $.groupBy("c1", "c2", "c3").build()
 
@@ -239,10 +254,12 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'having', ->
+
         it 'should output HAVING + conditions', ->
             expect("HAVING a > 10 AND b < 10").to.be $.having("a > 10", "b < 10").build()
 
     describe 'limit', ->
+
         it 'should output LIMIT + parameters if they are passed', ->
             expect("LIMIT :limit, 1000").to.be $.limit(":limit", 1000).build()
 
@@ -258,6 +275,7 @@ describe 'QueryBuilder.js', ->
 
     # Operations
     describe 'equal', ->
+
         it 'should output an equals expression', ->
             expect("x = 10").to.be $.equal("x", 10)
 
@@ -273,6 +291,7 @@ describe 'QueryBuilder.js', ->
 
     # Operations
     describe 'like', ->
+
         it 'should output a like expression', ->
             expect("x LIKE 10").to.be $.like("x", 10)
 
@@ -280,6 +299,7 @@ describe 'QueryBuilder.js', ->
             expect(-> $.like()).to.throwException((e) -> expect(e.name).to.be 'Illegal argument')
 
     describe 'notEqual', ->
+
         it 'should output a not equals expression', ->
             expect("x <> 10").to.be $.notEqual("x", 10)
 
@@ -294,6 +314,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'less', ->
+
         it 'should output a less expression', ->
             expect("x < 10").to.be $.less("x", 10)
 
@@ -305,6 +326,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'lessOrEqual', ->
+
         it 'should output a less or equal expression', ->
             expect("x <= 10").to.be $.lessOrEqual("x", 10)
 
@@ -316,6 +338,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'greater', ->
+
         it 'should output a greater expression', ->
             expect("x > 10").to.be $.greater("x", 10)
 
@@ -327,6 +350,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'greaterOrEqual', ->
+
         it 'should output a greater or equal expression', ->
             expect("x >= 10").to.be $.greaterOrEqual("x", 10)
 
@@ -338,6 +362,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'between', ->
+
         it 'should output a BETWEEN expression', ->
             expect("b BETWEEN a AND c").to.be $.between("b", "a", "c")
 
@@ -349,6 +374,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'in', ->
+
         it 'should output an IN expression', ->
             expect("id IN (1, 2, 3)").to.be $["in"]("id", [
                 1
@@ -369,6 +395,7 @@ describe 'QueryBuilder.js', ->
                 expect("Illegal argument").to.be e.name
 
     describe 'as', ->
+
         it 'should throw an Illegal argument exception if origin or alias are not a string', ->
             try
                 $.as()
@@ -380,6 +407,7 @@ describe 'QueryBuilder.js', ->
             expect("name AS newName").to.be $.as "name", "newName"
 
     describe 'or', ->
+
         it 'should throw an Illegal argument exception if less than two parameters are passed', ->
             try
                 $.or()
@@ -394,6 +422,7 @@ describe 'QueryBuilder.js', ->
             expect("(a OR b OR c)").to.be $.or(["a", "b", "c"])
 
     describe 'escape', ->
+
         it 'should output an quoted string if value is string', ->
             expect("'string'").to.be $.escape "string"
 
@@ -401,6 +430,7 @@ describe 'QueryBuilder.js', ->
             expect($.escape(null)).not.to.be.ok()
 
     describe 'and', ->
+
         it 'should throw an Illegal argument exception if less than two parameters are passed', ->
             try
                 $.and()
@@ -415,6 +445,7 @@ describe 'QueryBuilder.js', ->
             expect("(a AND b AND c)").to.be $.and(["a", "b", "c"])
 
     describe 'Integration Tests', ->
+
         it 'should output: SELECT c1, c2, c3 FROM sky WHERE y = :y AND z < :z AND x BETWEEN NOW() AND AAAA AND (y = 10 OR z > 20 OR x BETWEEN 10 AND 200)', ->
             sql = $.select("c1", "c2", "c3")
             .from("sky")
