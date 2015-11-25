@@ -314,6 +314,24 @@ describe 'Rules', ->
         it 'should return true if value is one float', ->
             expect(Rules.isUseful 1.0).to.be.ok()
 
+    describe 'parseInt', ->
+
+        it 'should return false if value is null', ->
+            expect(Rules.parseInt(null)).not.to.be.ok()
+
+        it 'should return false if value is undefined', ->
+            expect(Rules.parseInt(undefined)).not.to.be.ok()
+
+        it 'should return false if value is empty', ->
+            expect(Rules.parseInt('')).not.to.be.ok()
+
+        it 'should return false if value is a valid string', ->
+            expect(Rules.parseInt('abc')).not.to.be.ok()
+
+        it 'should return the int value', ->
+            value = Rules.parseInt('7')
+            expect(typeof value).to.eql 'number'
+
     describe 'test', ->
 
         it 'should validate the field if the rules are passed as an object and return the rules that did not pass', ->

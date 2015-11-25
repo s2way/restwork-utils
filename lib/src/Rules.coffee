@@ -135,6 +135,11 @@ class Rules
         return false if (value.length is 0) and (_.isString(value) or _.isArray(value))
         true
 
+    @parseInt: (value) ->
+        return false if !@isUseful value
+        return parseInt value
+
+
     # Test if a value will pass a set of validation rules specified in the rules parameter
     # @value The value to be validated
     # @rules {object} A JSON containing the rules to be tested against the fields
