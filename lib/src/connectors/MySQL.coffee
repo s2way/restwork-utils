@@ -3,6 +3,7 @@
 class MySQLConnector
 
     @HOST: 'host'
+    @PORT: 'port'
     @POOL_SIZE: 'poolSize'
     @TIMEOUT: 'timeout'
     @USER: 'user'
@@ -28,6 +29,7 @@ class MySQLConnector
         @mysql = container?.mysql || require 'mysql'
 
         host = params[MySQLConnector.HOST] || null
+        port = params[MySQLConnector.PORT] || 3306
         poolSize = params[MySQLConnector.POOL_SIZE] || null
         timeout = params[MySQLConnector.TIMEOUT] || MySQLConnector.DEFAULT_TIMEOUT
         user = params[MySQLConnector.USER] || null
@@ -42,6 +44,7 @@ class MySQLConnector
 
         poolParams =
             host: host
+            port: port
             database: @database
             user: user
             password: password

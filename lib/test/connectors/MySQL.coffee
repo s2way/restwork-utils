@@ -132,6 +132,7 @@ describe 'the MySQLConnector,', ->
 
             params =
                 host : 'host'
+                port : 1111
                 poolSize : 1
                 timeout : 10000
                 user: 'user'
@@ -141,6 +142,42 @@ describe 'the MySQLConnector,', ->
 
             expectedParams =
                 host: params.host
+                port: params.port
+                database: params.domain
+                user: params.user
+                password: params.password
+                connectionLimit: params.poolSize
+                acquireTimeout: params.timeout
+                waitForConnections: 0
+
+            deps =
+                mysql:
+                    createPool: (params) ->
+                        expect(params).to.eql expectedParams
+                        createPoolCalled = true
+
+            instance = new MySQLConnector params, deps
+
+            expect(instance).to.be.ok()
+            expect(instance.pool).to.be.ok()
+            expect(createPoolCalled).to.be.ok()
+
+        it 'should verify if the connection pool was created with default port', ->
+
+            createPoolCalled = false
+
+            params =
+                host : 'host'
+                poolSize : 1
+                timeout : 10000
+                user: 'user'
+                password: 'password'
+                domain: 'databaseName'
+                resource: 'tableName'
+
+            expectedParams =
+                host: params.host
+                port: 3306
                 database: params.domain
                 user: params.user
                 password: params.password
