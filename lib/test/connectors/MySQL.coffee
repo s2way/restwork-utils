@@ -563,6 +563,143 @@ describe 'the MySQLConnector,', ->
 
             connector.update id, data, ->
 
+    describe 'when updating by field an order', ->
+
+        it 'deve receber um erro se o field for undefined', (done) ->
+            expectedError = 'Invalid field'
+
+            connector = new MySQLConnector params
+            connector.updateByField undefined, null, null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o field for null', (done) ->
+            expectedError = 'Invalid field'
+
+            connector = new MySQLConnector params
+            connector.updateByField null, null, null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o field_value for undefined', (done) ->
+            expectedError = 'Invalid field_value'
+
+            connector = new MySQLConnector params
+            connector.updateByField 'order_id', undefined, null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o field_value for null', (done) ->
+            expectedError = 'Invalid field_value'
+
+            connector = new MySQLConnector params
+            connector.updateByField 'order_id', null, null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o field_value for zero', (done) ->
+            expectedError = 'Invalid field_value'
+
+            connector = new MySQLConnector params
+            connector.updateByField 'order_id', 0, null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o data for undefined', (done) ->
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.updateByField '1', 1, undefined, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o data for null', (done) ->
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.updateByField '1', 1, null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve receber um erro se o data for vazio', (done) ->
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.updateByField '1', 1, {}, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should pass the expected Query and Params', (done) ->
+
+            id = '12345678901234567890'
+
+            data =
+               issuer: "visa"
+               payment_type: "credito_a_vista"
+               installments: 1
+
+            expectedQuery = 'UPDATE tableName SET issuer=?,payment_type=?,installments=? WHERE order_id=?'
+
+            expectedParams = [
+                data.issuer,
+                data.payment_type,
+                data.installments,
+                id
+            ]
+
+            connector = new MySQLConnector params
+
+            connector._execute = (query, params, callback)->
+                expect(query).to.eql expectedQuery
+                expect(params).to.eql expectedParams
+                done()
+
+            connector.updateByField 'order_id', id, data, ->
+
+        it 'deve receber um erro se acontecer algum problema ao efetuar um update', (done) ->
+
+            expectedError = 'Error Query'
+
+            data =
+                id:1
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback)->
+                callback expectedError
+
+            connector.updateByField 'order_id', 1, data, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'deve retornar sucesso se não ocorreu nenhum erro', (done) ->
+
+            data =
+               issuer: "visa"
+               payment_type: "credito_a_vista"
+               installments: 1
+
+            connector = new MySQLConnector params
+
+            expectedRow =
+                affected_rows: 1
+
+            connector._execute = (query, params, callback)->
+                callback null, expectedRow
+
+            connector.updateByField 'order_id', '123', data, (err, row) ->
+                expect(err).not.to.be.ok()
+                expect(row).to.be.eql expectedRow
+                done()
+
     describe 'when executing a query', ->
 
         it 'should return an error if was a get connection problem', (done) ->
@@ -793,3 +930,124 @@ describe 'the MySQLConnector,', ->
                 done()
 
             connector.readJoin inputMessage, joinParams, ->
+
+    describe 'when start a transaction in connection', ->
+
+        it 'should call execute start transaction command', (done) ->
+
+            expected =
+                query: 'START TRANSACTION'
+                params: []
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback) ->
+                expect(query).to.eql expected.query
+                expect(params).to.eql expected.params
+                done()
+            connector.start_transaction ->
+
+        it 'should return an error message if the database is out', (done) ->
+
+            expected =
+                errorMessage: 'Internal Error'
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback) ->
+                callback expected
+            connector.start_transaction (error, success) ->
+                expect(error).to.eql expected
+                expect(success).not.to.be.ok()
+                done()
+
+    describe 'when a commit transaction in connection', ->
+
+        it 'should call execute commit command', (done) ->
+
+            expected =
+                query: 'COMMIT'
+                params: []
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback) ->
+                expect(query).to.eql expected.query
+                expect(params).to.eql expected.params
+                done()
+            connector.commit ->
+
+        it 'should return an error message if the database is out', (done) ->
+
+            expected =
+                errorMessage: 'Internal Error'
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback) ->
+                callback expected
+            connector.commit (error, success) ->
+                expect(error).to.eql expected
+                expect(success).not.to.be.ok()
+                done()
+
+    describe 'when a rollback transaction in connection', ->
+
+        it 'should call execute  ->rollback command', (done) ->
+
+            expected =
+                query: 'ROLLBACK'
+                params: []
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback) ->
+                expect(query).to.eql expected.query
+                expect(params).to.eql expected.params
+                done()
+            connector.rollback ->
+
+        it 'should return an error message if the database is out', (done) ->
+
+            expected =
+                errorMessage: 'Internal Error'
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback) ->
+                callback expected
+            connector.rollback (error, success) ->
+                expect(error).to.eql expected
+                expect(success).not.to.be.ok()
+                done()
+
+    describe 'when a call procedure', ->
+
+        it 'should call procedure method', (done) ->
+
+            expectedError = 'Internal Error'
+
+            connector= new MySQLConnector params
+            connector._execute =  (query, params, callback) ->
+                done()
+            connector.callProcedure 'baixa_pedido', [], ->
+
+        it 'should return an error message if the procedure execution failed',  (done) ->
+
+            expectedError = 'Internal error'
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback) ->
+                callback expectedError
+            connector.callProcedure 'baixa_pedido', [], (error, success)->
+                expect(error).to.eql expectedError
+                expect(success).not.to.be.ok()
+                done()
+
+        it 'should return a procedure results if everything is ok', (done) ->
+
+            expectedMessage = 'ok'
+
+            connector = new MySQLConnector params
+            connector._execute = (query, params, callback) ->
+                callback null, expectedMessage
+            connector.callProcedure 'baixa_pedido', [], (error, success) ->
+                expect(error).not.to.be.ok()
+                expect(success).to.eql expectedMessage
+                done()
+
+

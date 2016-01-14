@@ -104,6 +104,25 @@ class MySQLConnector
             return callback err if err?
             return callback null, row
 
+    updateByField:(field, field_value, data, callback) ->
+        return callback 'Invalid field' if !@rules.isUseful(field)
+        return callback 'Invalid field_value' if !@rules.isUseful(field_value) or @rules.isZero field_value
+        return callback 'Invalid data' if !@rules.isUseful(data)
+
+        fields = ''
+        values = []
+
+        for key, value of data
+            fields += "#{key}=?,"
+            values.push value
+
+        fields = fields.substr 0,fields.length-1
+        values.push field_value
+
+        @_execute "UPDATE #{@table} SET #{fields} WHERE #{field}=?", values, (err, row) ->
+            return callback err if err?
+            return callback null, row
+
     _checkArg: (arg, name) ->
         if !@rules.isUseful arg
             throw new @Exceptions.Fatal @Exceptions.INVALID_ARGUMENT, "Parameter #{name} is invalid"
@@ -176,6 +195,32 @@ class MySQLConnector
         @_execute "DELETE FROM #{@table} WHERE #{fields}", values, (err, row) ->
             return callback err if err?
             return callback null, row
+
+    start_transaction: (callback) ->
+        @_execute "START TRANSACTION", [], (err, row) ->
+            return callback err if err?
+            return callback null, row
+
+    commit: (callback) ->
+        @_execute "COMMIT", [], (err, row) ->
+            return callback err if err?
+            return callback null, row
+
+    rollback: (callback) ->
+        @_execute "ROLLBACK", [], (err, row) ->
+            return callback err if err?
+            return callback null, row
+
+    callProcedure: (name, data, callback) ->
+
+        fields = ''
+        for key, value of data
+            fields += "#{value},"
+        fields = fields.substr 0,fields.length-1
+
+        @_execute "CALL #{name} (#{fields})", [], (error, success) ->
+            return callback error if error?
+            callback null, success
 
     # createMany
     # readMany
