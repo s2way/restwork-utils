@@ -119,6 +119,7 @@ class MySQLConnector
         fields = fields.substr 0,fields.length-1
         values.push field_value
 
+        query = "UPDATE #{@table} SET #{fields} WHERE #{field}=?"
         @_execute "UPDATE #{@table} SET #{fields} WHERE #{field}=?", values, (err, row) ->
             return callback err if err?
             return callback null, row
@@ -218,7 +219,9 @@ class MySQLConnector
             fields += "#{value},"
         fields = fields.substr 0,fields.length-1
 
-        @_execute "CALL #{name} (#{fields})", [], (error, success) ->
+        query = "CALL #{name} (#{fields})"
+
+        @_execute query, [], (error, success) ->
             return callback error if error?
             callback null, success
 
