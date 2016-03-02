@@ -423,6 +423,114 @@ describe 'the MySQLConnector,', ->
 
             connector.create data, ->
 
+    describe 'when creating an multiple orders', ->
+
+        it 'should return an error if the order data is null', (done) ->
+
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.multiCreate null, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return an error if the order data is undefined', (done) ->
+
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.multiCreate undefined, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return an error if the order data is Empty object', (done) ->
+
+            expectedError = 'Invalid data'
+
+            connector = new MySQLConnector params
+            connector.multiCreate {}, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return the query error if it happens', (done) ->
+
+            expectedError = 'Error Query'
+
+            data = [
+                {
+                    id: 1
+                    other_id: 2
+                    any_id: 99
+                }
+            ]
+
+            connector = new MySQLConnector params
+
+            connector._execute = (query, params, callback)->
+                callback expectedError
+
+            connector.multiCreate data, (error, response) ->
+                expect(error).to.eql expectedError
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should return the found rows affected', (done) ->
+
+            data = [
+                {
+                    id: 1
+                    other_id: 2
+                    any_id: 99
+                }
+            ]
+
+            connector = new MySQLConnector params
+
+            connector._execute = (query, params, callback)->
+                callback()
+
+            connector.multiCreate data, (error, response) ->
+                expect(error).not.to.be.ok()
+                expect(response).not.to.be.ok()
+                done()
+
+        it 'should pass the expected Query and Params', (done) ->
+
+            expectedQuery = 'INSERT INTO tableName (id,other_id,any_id) VALUES (?,?,?),(?,?,?),(?,?,?)'
+
+            expectedParams = [10,20,30,15,25,35,25,35,45]
+
+            data = [
+                {
+                    id       : expectedParams[0]
+                    other_id : expectedParams[1]
+                    any_id   : expectedParams[2]
+                },
+                {
+                    id       : expectedParams[3]
+                    other_id : expectedParams[4]
+                    any_id   : expectedParams[5]
+                },
+                {
+                    id       : expectedParams[6]
+                    other_id : expectedParams[7]
+                    any_id   : expectedParams[8]
+                }
+            ]
+
+            console.log ''
+            connector = new MySQLConnector params
+
+            connector._execute = (query, params, callback)->
+                expect(query).to.eql expectedQuery
+                expect(params).to.eql expectedParams
+                done()
+
+            connector.multiCreate data, ->
+
     describe 'when deleting', ->
 
         it 'should pass the expected Query and Params', (done) ->
@@ -1049,5 +1157,3 @@ describe 'the MySQLConnector,', ->
                 expect(error).not.to.be.ok()
                 expect(success).to.eql expectedMessage
                 done()
-
-

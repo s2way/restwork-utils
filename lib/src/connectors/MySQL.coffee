@@ -80,6 +80,36 @@ class MySQLConnector
             return callback err if err?
             return callback null, row
 
+    # multi data in one insert command
+    multiCreate: (listData, callback) ->
+        return callback 'Invalid data' if !@rules.isUseful(listData)
+        isExtractFields = true
+        fields = ''
+        values = []
+        queryValues = ''
+
+        listData.map (data) ->
+            queryValues += '('
+            for key, value of data
+
+                # Extrai os fields apenas na primeira vez
+                fields += "#{key}," if isExtractFields
+                values.push value
+                queryValues += '?,'
+
+            isExtractFields = false
+            # Remove última vírgula da quantidade de fields
+            queryValues = queryValues.substr 0,queryValues.length-1
+            queryValues += '),'
+
+        # Remove última vírgula da quantidade de rows
+        queryValues = queryValues.substr 0,queryValues.length-1
+        fields = fields.substr 0,fields.length-1
+
+        @_execute "INSERT INTO #{@table} (#{fields}) VALUES #{queryValues}", values, (err, row) ->
+            return callback err if err?
+            return callback null, row
+
     bulkCreate: (query, callback) ->
         @_execute query, [], (err, row) =>
             return callback err if err?
