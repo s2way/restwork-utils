@@ -109,6 +109,18 @@ describe 'QueryBuilder.js', ->
                 expect(e.name).to.be 'Illegal argument'
             )
 
+    describe 'selectMaxFrom', ->
+
+        it 'should output SELECT MAX(field) FROM table', ->
+            expect("SELECT MAX(field) FROM table").to.be $.selectMaxFrom("field", 'table').build()
+
+        it 'should throw an exception if the parameter table is not passed', ->
+            expect(->
+                $.selectMaxFrom()
+            ).to.throwException((e) ->
+                expect(e.name).to.be 'Illegal argument'
+            )
+
     describe 'select', ->
 
         it 'should output SELECT + the parameters if they are passed', ->

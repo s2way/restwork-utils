@@ -45,6 +45,11 @@ class QueryBuilder
         @query += "SELECT COUNT(*) AS count FROM " + table + " " if !@n1ql
         this
 
+    selectMaxFrom: (field, table) ->
+        throw new @Exceptions.Error @Exceptions.ILLEGAL_ARGUMENT if table is undefined
+        @query += "SELECT MAX(#{field}) FROM " + table + " " if !@n1ql
+        this
+
     select: ->
         throw new @Exceptions.Error @Exceptions.ILLEGAL_ARGUMENT if arguments.length is 0
         @query += "SELECT " + @_fieldsToCommaList(arguments) + " "
