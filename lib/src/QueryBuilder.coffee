@@ -47,7 +47,7 @@ class QueryBuilder
 
     selectMaxFrom: (field, table) ->
         throw new @Exceptions.Error @Exceptions.ILLEGAL_ARGUMENT if table is undefined
-        @query += "SELECT MAX(#{field}) FROM " + table + " " if !@n1ql
+        @query += "SELECT MAX(#{field}) as max FROM " + table + " " if !@n1ql
         this
 
     select: ->
