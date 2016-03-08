@@ -3,6 +3,7 @@
 path = require 'path'
 uuid = require 'node-uuid'
 qs = require 'querystring'
+defaultTimeout = 30000
 
 class HttpConnector
 
@@ -11,9 +12,9 @@ class HttpConnector
 
     post: (params, callback) ->
         if params?.type is 'json'
-            client = @restify.createJsonClient url:params.url
+            client = @restify.createJsonClient url:params.url, requestTimeout: params.timeout or defaultTimeout
         else
-            client = @restify.createStringClient url: params.url
+            client = @restify.createStringClient url: params.url, requestTimeout: params.timeout or defaultTimeout
 
         path = params?.path || ''
 
@@ -23,9 +24,9 @@ class HttpConnector
 
     get: (params, callback) ->
         if params?.type is 'json'
-            client = @restify.createJsonClient url:params.url
+            client = @restify.createJsonClient url: params.url, requestTimeout: params.timeout or defaultTimeout
         else
-            client = @restify.createStringClient url:params.url
+            client = @restify.createStringClient url: params.url, requestTimeout: params.timeout or defaultTimeout
 
         path = params?.path || ''
 
@@ -37,9 +38,9 @@ class HttpConnector
 
     put: (params, callback) ->
         if params?.type is 'json'
-            client = @restify.createJsonClient url:params.url
+            client = @restify.createJsonClient url: params.url, requestTimeout: params.timeout or defaultTimeout
         else
-            client = @restify.createStringClient url: params.url
+            client = @restify.createStringClient url: params.url, requestTimeout: params.timeout or defaultTimeout
 
         path = params?.path || ''
 
