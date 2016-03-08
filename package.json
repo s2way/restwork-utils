@@ -1,6 +1,6 @@
 {
   "name": "waferpie-utils",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "S2way - WaferPie global tools",
   "main": "lib/Main.coffee",
   "scripts": {
