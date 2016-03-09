@@ -112,7 +112,7 @@ describe 'QueryBuilder.js', ->
     describe 'selectMaxFrom', ->
 
         it 'should output SELECT MAX(field) FROM table', ->
-            expect("SELECT MAX(field) FROM table").to.be $.selectMaxFrom("field", 'table').build()
+            expect("SELECT MAX(field) as max FROM table").to.be $.selectMaxFrom("field", 'table').build()
 
         it 'should throw an exception if the parameter table is not passed', ->
             expect(->
