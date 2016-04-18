@@ -160,7 +160,8 @@ class MySQLConnector
 
     _execute: (query, params, callback) ->
         @pool.getConnection (err, connection) =>
-            return callback 'Database connection failed' if err?
+            if err?
+                return callback "Database connection failed. Error: #{err}" if err?
             @_selectDatabase "#{@database}", connection, (err) ->
                 if err?
                     connection.release()

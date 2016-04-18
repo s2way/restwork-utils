@@ -160,6 +160,11 @@ class QueryBuilder
         @query += "LEFT JOIN " + table + " "
         this
 
+    rightJoin: (table) ->
+        throw new @Exceptions.Error @Exceptions.ILLEGAL_ARGUMENT if typeof table isnt "string"
+        @query += "RIGHT JOIN " + table + " "
+        this
+
     having: ->
         @query += "HAVING " + @_conditions(arguments, "AND") + " "
         this

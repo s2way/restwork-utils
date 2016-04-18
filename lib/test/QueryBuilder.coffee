@@ -201,6 +201,18 @@ describe 'QueryBuilder.js', ->
             catch e
                 expect("Illegal argument").to.be e.name
 
+    describe 'rightJoin', ->
+
+        it 'should output an RIGHT JOIN + table name', ->
+            expect("RIGHT JOIN sky").to.be $.rightJoin("sky").build()
+
+        it 'should throw an exception if no parameters are passed', ->
+            try
+                $.rightJoin()
+                assert.fail()
+            catch e
+                expect("Illegal argument").to.be e.name
+
     describe 'on', ->
 
         it 'should output an ON + conditions', ->

@@ -812,13 +812,13 @@ describe 'the MySQLConnector,', ->
 
         it 'should return an error if was a get connection problem', (done) ->
 
-            expectedError = 'Database connection failed'
+            expectedError = 'Database connection failed. Error: my error'
 
             deps =
                 mysql:
                     createPool: (params) ->
                         getConnection: (callback) ->
-                            callback ''
+                            callback 'my error'
 
             instance = new MySQLConnector params, deps
             instance._execute '', [], (error, response)->
