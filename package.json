@@ -50,13 +50,15 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
-    "nsutil": "^0.1.4",
     "couchbase": "^2.1.1",
     "elastic.js": "^1.2.0",
     "elasticsearch": "^11.0.1",
+    "heapdump": "^0.3.7",
+    "memwatch": "^0.2.2",
     "moment": "^2.10.3",
     "mysql": "^2.9.0",
     "node-uuid": "^1.4.3",
+    "nsutil": "^0.1.4",
     "restify": "~3.0.3",
     "textchocolate": "^0.1.1",
     "underscore": "^1.8.3",
