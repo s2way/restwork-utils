@@ -40,9 +40,7 @@
     "grunt-contrib-watch": "~0.6.1",
     "grunt-exec": "~0.4.6",
     "grunt-mocha-test": "^0.12.7",
-    "heapdump": "^0.3.7",
     "load-grunt-tasks": "^3.1.0",
-    "memwatch": "^0.2.2",
     "mocha": "^2.2.4",
     "mocha-cov-reporter": "^1.1.0",
     "travis-cov": "^0.2.5"
@@ -52,6 +50,8 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
+    "memwatch": "^0.2.2",
+    "heapdump": "^0.3.7",
     "nsutil": "^0.1.4",
     "couchbase": "^2.1.1",
     "elastic.js": "^1.2.0",
