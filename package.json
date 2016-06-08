@@ -50,8 +50,6 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
-    "memwatch": "^0.2.2",
-    "heapdump": "^0.3.7",
     "nsutil": "^0.1.4",
     "couchbase": "^2.1.1",
     "elastic.js": "^1.2.0",
