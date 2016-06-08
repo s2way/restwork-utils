@@ -26,7 +26,7 @@ class Watcher
         @observers = {}
         @stop = false
         @name = '' || params?.name
-
+        @log = params?.log or true
     _checkArgs: (task, callback) ->
         name = task[Watcher.NAME]
         throw new Exceptions.Error Exceptions.INVALID_ARGUMENT, 'callback' unless Rules.isFunction callback
@@ -134,9 +134,9 @@ class Watcher
             unless taskObj.meta.isLocked
                 taskObj.meta.isLocked = true
                 taskObj.task[Watcher.RUN](taskObj.events)
-                console.log "Task: [#{taskObj.task[Watcher.NAME]}] trying to invoke. "
+                console.log "Task: [#{taskObj.task[Watcher.NAME]}] trying to invoke. " if @log
             else
-                console.log "Task: [#{taskObj.task[Watcher.NAME]}] blocked. "
+                console.log "Task: [#{taskObj.task[Watcher.NAME]}] blocked. " if @log
         , taskObj.task[Watcher.INTERVAL], taskObj
 
 module.exports = Watcher
