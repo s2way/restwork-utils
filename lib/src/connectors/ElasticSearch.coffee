@@ -58,7 +58,7 @@ class ElasticSearch
         options =
             index: params?.index || null
             type: params?.type || null
-            body : params?.data || null
+            body: params?.data || null
 
         options.id = params?.id if params?.id?
 

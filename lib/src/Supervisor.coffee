@@ -12,7 +12,7 @@ class Supervisor
         @index = config.index or 'microservices'
         @type = config.type or 'server_metrics'
         @url = config.url or '127.0.0.1'
-        @port = @port or 9200
+        @port = config.port or 9200
         @interval = config.interval or 2000
         @pid = config.pid or process.pid
         @app = config.app or 'App'
