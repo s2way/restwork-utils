@@ -31,6 +31,7 @@ class Supervisor
             data: info.gather()
         source = host: @url, port: @port
         es.save source, stats, (e, s) ->
+            console.log e
             emitter.emit 'error' if e
             emitter.emit 'success'
         es = null
