@@ -45,7 +45,6 @@
     "memwatch": "^0.2.2",
     "mocha": "^2.2.4",
     "mocha-cov-reporter": "^1.1.0",
-    "nsutil": "^0.1.4",
     "travis-cov": "^0.2.5"
   },
   "engines": {
@@ -53,6 +52,7 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
+    "nsutil": "^0.1.4",
     "couchbase": "^2.1.1",
     "elastic.js": "^1.2.0",
     "elasticsearch": "^11.0.1",
