@@ -13,6 +13,8 @@ class SystemInfo
         catch e
             console.log 'Heads up! The monitoring was activated but there are modules missing'
             console.log e
+            # remember: the Supervisor module is meant to be used in a separated process,
+            # so we're exiting now
             process.exit 1
         start = moment().format('x')
         loadAvg = os.loadavg()
