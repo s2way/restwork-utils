@@ -1,5 +1,4 @@
 os = require 'os'
-ns = require 'nsutil'
 moment = require 'moment'
 
 class SystemInfo
@@ -7,6 +6,14 @@ class SystemInfo
     constructor: (@appName, @pid) ->
 
     gather: ->
+        ns = null
+        try
+            require.resolve 'nsutil'
+            ns = require 'nsutil'
+        catch e
+            console.log 'Heads up! The monitoring was activated but there are modules missing'
+            console.log e
+            process.exit 1
         start = moment().format('x')
         loadAvg = os.loadavg()
         memory = ns.virtualMemory()
