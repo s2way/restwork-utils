@@ -14,15 +14,18 @@ class MemProfiler
             console.log e
             return
 
+        console.log 'Adding mem profiling listeners...'
         memWatch.on 'leak', (info) =>
             console.log 'LEAK', info
             file = "./leak-#{process.pid}-#{Date.now()}-.heapsnapshot"
-            heapDump.writeSnapshot file, (err) ->
+            heapDump.writeSnaps hot file, (err) ->
                 console.log err if err?
                 console.log 'Heap snapshot taken'
 
         memWatch.on 'stats', (stats) =>
             console.log 'STATS', stats
+
+        console.log 'Listeners added'
 
     monitor: ->
         @snapShot = new memWatch.HeapDiff()
