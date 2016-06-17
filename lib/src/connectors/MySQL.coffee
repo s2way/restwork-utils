@@ -106,6 +106,12 @@ class MySQLConnector
         queryValues = queryValues.substr 0,queryValues.length-1
         fields = fields.substr 0,fields.length-1
 
+        console.log 'MULTI CREATE '
+        console.log "INSERT INTO #{@table} (#{fields}) VALUES #{queryValues}"
+        console.log '========='
+        console.log values
+        console.log 'MULTI CREATE '
+
         @_execute "INSERT INTO #{@table} (#{fields}) VALUES #{queryValues}", values, (err, row) ->
             return callback err if err?
             return callback null, row
