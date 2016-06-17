@@ -27,6 +27,23 @@
   "bugs": {
     "url": "https://github.com/s2way/waferpie-utils/issues"
   },
+  "dependencies": {
+    "couchbase": "^2.1.1",
+    "elastic.js": "^1.2.0",
+    "elasticsearch": "^11.0.1",
+    "moment": "^2.10.3",
+    "mysql": "^2.9.0",
+    "node-uuid": "^1.4.3",
+    "restify": "~3.0.3",
+    "textchocolate": "^0.1.1",
+    "underscore": "^1.8.3",
+    "xml2js": "^0.4.10"
+  },
+  "optionalDependencies": {
+    "heapdump": "^0.3.7",
+    "memwatch": "^0.2.2",
+    "nsutil": "^0.1.4"
+  },
   "devDependencies": {
     "blanket": "git://github.com/alex-seville/blanket.git",
     "coffee-coverage": "^0.4.6",
@@ -48,15 +65,5 @@
   "engines": {
     "node": ">= 0.6.0",
     "npm": ">= 1.0.0"
-  },
-  "dependencies": {
-    "couchbase": "^2.1.1",
-    "moment": "^2.10.3",
-    "mysql": "^2.9.0",
-    "node-uuid": "^1.4.3",
-    "restify": "~3.0.3",
-    "textchocolate": "^0.1.1",
-    "underscore": "^1.8.3",
-    "xml2js": "^0.4.10"
   }
 }
