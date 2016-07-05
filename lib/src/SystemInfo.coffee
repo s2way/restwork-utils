@@ -59,6 +59,6 @@ class SystemInfo
             # os disk
             diskTotalMb: parseFloat((disk.total / 1024 / 1024).toFixed 2)
             diskUsedMb: parseFloat((disk.used / 1024 / 1024).toFixed 2)
-            diskFreeMb: parseFloat((disk.free / 1024 / 1024).toFixed 2) 
+            diskFreeMb: parseFloat((disk.free / 1024 / 1024).toFixed 2)
 
 module.exports = SystemInfo

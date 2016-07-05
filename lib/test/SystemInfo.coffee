@@ -8,5 +8,6 @@ SystemInfo = require './../src/SystemInfo'
 
 describe 'SystemInfo', ->
 
-    describe 'refresh', ->
-        expect(SystemInfo.refresh).to.be.ok()
+    describe 'gather', ->
+        systemInfo = new SystemInfo
+        expect(systemInfo.gather).to.be.ok()
