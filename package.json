@@ -28,7 +28,6 @@
     "url": "https://github.com/s2way/waferpie-utils/issues"
   },
   "dependencies": {
-    "couchbase": "^2.1.1",
     "elastic.js": "^1.2.0",
     "elasticsearch": "^11.0.1",
     "moment": "^2.10.3",
@@ -40,6 +39,7 @@
     "xml2js": "^0.4.10"
   },
   "optionalDependencies": {
+    "couchbase": "^2.1.1",
     "heapdump": "^0.3.7",
     "memwatch": "^0.2.2",
     "nsutil": "^0.1.4"
