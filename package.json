@@ -50,7 +50,7 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
-    "couchbase": "^2.1.1",
+    "couchbase": "2.1.1",
     "moment": "^2.10.3",
     "mysql": "^2.9.0",
     "node-uuid": "^1.4.3",
