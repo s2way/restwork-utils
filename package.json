@@ -30,7 +30,6 @@
   "devDependencies": {
     "blanket": "git://github.com/alex-seville/blanket.git",
     "coffee-coverage": "^0.4.6",
-    "coffee-script": "latest",
     "coffeelint": "^1.9.4",
     "expect.js": "^0.3.1",
     "grunt": "~0.4.5",
@@ -50,6 +49,7 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
+    "coffee-script": "latest",
     "couchbase": "2.1.1",
     "moment": "^2.10.3",
     "mysql": "^2.9.0",
