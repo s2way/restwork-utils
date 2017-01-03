@@ -5,33 +5,96 @@ expect = require 'expect.js'
 
 describe 'the HttpConnector,', ->
 
-    describe 'when the get method is called', (done) ->
+    describe 'when the get method is called', ->
 
-        it 'should build the url with params if they are set', ->
+        it 'should call createJSONClient if type is JSON', (done) ->
 
-            url = 'http://localhost:1234'
-            expectedUrl = "#{url}?key=value"
-            receivedUrl = null
+            expectedOptionsUrl =
+                url: 'any_url'
 
             class Restify
-                @createStringClient: (options)->
-                    receivedUrl = options.url
-                    mockPost =
+                @createJsonClient: (optionsUrl) ->
+                    expect(optionsUrl).to.eql expectedOptionsUrl
+                    done()
+                    mockGet =
                         get: ->
 
             deps =
                 restify: Restify
 
             params =
-                path: url
-                urlParams:
-                    key: 'value'
+                type: 'json'
+                url: expectedOptionsUrl.url
 
             instance = new HttpConnector deps
             instance.get params, ->
-                expect(receivedUrl).to.eql expectedUrl
+
+        it 'should call createStringClient if type was not passed', (done) ->
+
+            expectedOptionsUrl =
+                url: 'any_url'
+
+            class Restify
+                @createStringClient: (optionsUrl) ->
+                    expect(optionsUrl).to.eql expectedOptionsUrl
+                    done()
+                    mockGet =
+                        get: ->
+
+            deps =
+                restify: Restify
+
+            params =
+                url: expectedOptionsUrl.url
+
+            instance = new HttpConnector deps
+            instance.get params, ->
+
+        it 'should return an error if there was an erro in the request', (done) ->
+
+            expectedError = 'Internal Error'
+
+            class Restify
+                @createJsonClient: (optionsUrl) ->
+                    mockGet =
+                        get: (options, callback) ->
+                            callback expectedError
+
+            deps =
+                restify: Restify
+
+            params =
+                type: 'json'
+                url: 'any_url'
+
+            instance = new HttpConnector deps
+            instance.get params, (error, success) ->
+                expect(error).to.eql expectedError
+                expect(success).not.to.be.ok()
                 done()
 
+        it 'return the response from the request', (done) ->
+
+            expectedResponse = 'Any Response'
+
+            class Restify
+                @createJsonClient: (optionsUrl) ->
+                    mockGet =
+                        get: (options, callback) ->
+                            callback null, null, null, expectedResponse
+
+            deps =
+                restify: Restify
+
+            params =
+                type: 'json'
+                url: 'any_url'
+
+            instance = new HttpConnector deps
+            instance.get params, (error, success) ->
+                expect(error).not.to.be.ok()
+                expect(success).to.eql expectedResponse
+                done()
 
     describe 'when the post method is called', (done) ->
 
