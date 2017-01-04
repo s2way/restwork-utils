@@ -10,10 +10,16 @@ class HttpConnector
         @restify = container?.restify || require 'restify'
 
     post: (params, callback) ->
+
+        options =
+            url: params.url
+
+        options.headers = params.headers if params?.headers?
+
         if params?.type is 'json'
-            client = @restify.createJsonClient url:params.url
+            client = @restify.createJsonClient options
         else
-            client = @restify.createStringClient url: params.url
+            client = @restify.createStringClient options
 
         path = params?.path || ''
 
@@ -41,10 +47,16 @@ class HttpConnector
             callback null, data
 
     put: (params, callback) ->
+
+        options =
+            url: params.url
+
+        options.headers = params.headers if params?.headers?
+
         if params?.type is 'json'
-            client = @restify.createJsonClient url:params.url
+            client = @restify.createJsonClient options
         else
-            client = @restify.createStringClient url: params.url
+            client = @restify.createStringClient options
 
         path = params?.path || ''
 
